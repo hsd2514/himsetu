@@ -1,36 +1,188 @@
 @import "tailwindcss";
 
-:root {
-  --navy-950: #060c18;
-  --navy-900: #0a1628;
-  --navy-800: #11213b;
-  --navy-700: #1b3052;
-  --ice-300: #9fdcf5;
-  --ice-400: #5cc4ef;
-  --ice-500: #2aa8e0;
-}
+/* ── Colour system ───────────────────────────────────────────────────────────
+   Components use four Tailwind families, each mapped to a role:
+     navy-950 page background   navy-900 panel   navy-800 raised   navy-700 border
+     ice-500 accent fill        ice-400 accent hover   ice-300 accent text
+     slate-50..600 text, strongest to faintest
+   <html data-theme="…" data-mode="light|dark"> picks the values below.
+   ─────────────────────────────────────────────────────────────────────────── */
 
 @theme inline {
-  --color-navy-950: var(--navy-950);
-  --color-navy-900: var(--navy-900);
-  --color-navy-800: var(--navy-800);
-  --color-navy-700: var(--navy-700);
-  --color-ice-300: var(--ice-300);
-  --color-ice-400: var(--ice-400);
-  --color-ice-500: var(--ice-500);
+  --color-navy-950: var(--bg);
+  --color-navy-900: var(--panel);
+  --color-navy-800: var(--raised);
+  --color-navy-700: var(--border);
+  --color-ice-300: var(--accent-text);
+  --color-ice-400: var(--accent-hover);
+  --color-ice-500: var(--accent);
   --font-sans: var(--font-geist-sans), var(--font-devanagari);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: var(--navy-950);
-  color: #e2e8f0;
-  font-family: var(--font-geist-sans), var(--font-devanagari), system-ui, sans-serif;
+/* Dark neutrals: lifted charcoal, panels a clear step above the page. */
+html[data-mode="dark"] {
+  color-scheme: dark;
+  --color-slate-50: #f6f7f9;
+  --color-slate-100: #eceef1;
+  --color-slate-200: #d7dbe0;
+  --color-slate-300: #b6bdc6;
+  --color-slate-400: #8e97a3;
+  --color-slate-500: #6c7480;
+  --color-slate-600: #4d5560;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.03) inset;
 }
 
-/* OSM tiles recoloured to sit in the navy theme. */
-.dark-tiles {
-  filter: invert(1) hue-rotate(190deg) brightness(0.85) saturate(0.6);
+/* Light neutrals: paper-white panels on a soft grey page. */
+html[data-mode="light"] {
+  color-scheme: light;
+  --color-slate-50: #0d1117;
+  --color-slate-100: #151a21;
+  --color-slate-200: #252c35;
+  --color-slate-300: #3a434e;
+  --color-slate-400: #56606c;
+  --color-slate-500: #717b87;
+  --color-slate-600: #a2abb5;
+  --color-white: #0f172a;
+  --color-red-200: #991b1b;
+  --color-red-300: #b91c1c;
+  --color-red-950: #fee2e2;
+  --color-amber-200: #92400e;
+  --color-amber-300: #b45309;
+  --color-emerald-200: #065f46;
+  --color-emerald-300: #047857;
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 8px 24px -16px rgb(15 23 42 / 0.2);
+  --map-marker: #ffffff;
+}
+
+/* Palettes: a neutral tint + one accent. accent-text is tuned to read on --panel. */
+html[data-theme="ice"][data-mode="dark"] {
+  --bg: #0f1216; --panel: #161a20; --raised: #1d222a; --border: #29303a;
+  --accent: #38a8de; --accent-hover: #5ab8e6; --accent-text: #7cc8ee;
+  --chart-1: #2d93c7; --chart-2: #c47a08; --map-marker: #161a20;
+}
+html[data-theme="ice"][data-mode="light"] {
+  --bg: #f4f6f8; --panel: #ffffff; --raised: #eef1f4; --border: #dfe4ea;
+  --accent: #0a78b5; --accent-hover: #0869a0; --accent-text: #075d8e;
+  --chart-1: #0284c7; --chart-2: #b45309;
+}
+
+html[data-theme="graphite"][data-mode="dark"] {
+  --bg: #111111; --panel: #19191b; --raised: #212124; --border: #2e2e32;
+  --accent: #f07a2a; --accent-hover: #f5904a; --accent-text: #f8a468;
+  --chart-1: #d9650c; --chart-2: #2f7fc4; --map-marker: #19191b;
+}
+html[data-theme="graphite"][data-mode="light"] {
+  --bg: #f5f5f4; --panel: #ffffff; --raised: #efefee; --border: #e2e2e0;
+  --accent: #d4560c; --accent-hover: #bb4a09; --accent-text: #a8430a;
+  --chart-1: #c2410c; --chart-2: #1d6fb8;
+}
+
+html[data-theme="polar"][data-mode="dark"] {
+  --bg: #0f1218; --panel: #161b23; --raised: #1d232d; --border: #2a3240;
+  --accent: #4f8ff7; --accent-hover: #6ea2f8; --accent-text: #8fb6fa;
+  --chart-1: #2f6fe0; --chart-2: #bf7614; --map-marker: #161b23;
+}
+html[data-theme="polar"][data-mode="light"] {
+  --bg: #f5f7fa; --panel: #ffffff; --raised: #eef2f7; --border: #dde4ee;
+  --accent: #2563eb; --accent-hover: #1d4fd0; --accent-text: #1d4ed8;
+  --chart-1: #2563eb; --chart-2: #b45309;
+}
+
+html[data-theme="aurora"][data-mode="dark"] {
+  --bg: #0e1312; --panel: #151b1a; --raised: #1c2322; --border: #29332f;
+  --accent: #2fbf8a; --accent-hover: #4fcf9e; --accent-text: #74dab3;
+  --chart-1: #10a371; --chart-2: #c77a19; --map-marker: #151b1a;
+}
+html[data-theme="aurora"][data-mode="light"] {
+  --bg: #f3f7f5; --panel: #ffffff; --raised: #ecf2ef; --border: #dbe5e0;
+  --accent: #05895f; --accent-hover: #047650; --accent-text: #046c4a;
+  --chart-1: #047857; --chart-2: #b45309;
+}
+
+html[data-theme="saffron"][data-mode="dark"] {
+  --bg: #12110f; --panel: #1a1815; --raised: #221f1b; --border: #302b25;
+  --accent: #eaa21c; --accent-hover: #f0b340; --accent-text: #f3c264;
+  --chart-1: #c47a08; --chart-2: #2f7fc4; --map-marker: #1a1815;
+}
+html[data-theme="saffron"][data-mode="light"] {
+  --bg: #f8f6f2; --panel: #ffffff; --raised: #f1ede6; --border: #e5dfd5;
+  --accent: #c26d06; --accent-hover: #a95e05; --accent-text: #9a5505;
+  --chart-1: #b45309; --chart-2: #1d6fb8;
+}
+
+body {
+  background: var(--bg);
+  color: var(--color-slate-200);
+  font-family: var(--font-geist-sans), var(--font-devanagari), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* One elevation step, used by Card and panels. In a layer so utilities (border-l-*, etc.) can override it. */
+@layer components {
+  .surface {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* OSM tiles recoloured: neutral grey in dark mode, muted in light. */
+html[data-mode="dark"] .dark-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.85) saturate(0.25);
+}
+html[data-mode="light"] .dark-tiles {
+  filter: saturate(0.3) contrast(0.95);
+}
+
+/* Sections rise in once, staggered by --i. Live dots pulse. Both off under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: inherit;
+    animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ping {
+  75%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
 }
 
 /* ── Issue #42: Print-only crate label ──────────────────────────────────────
@@ -79,181 +231,3 @@ body {
   }
 }
 
-/* ── UI revamp: depth, focus, motion ─────────────────────────────────────── */
-
-body {
-  background:
-    radial-gradient(1200px 520px at 70% -10%, rgb(42 168 224 / 0.1), transparent 60%),
-    radial-gradient(900px 480px at -10% 110%, rgb(42 168 224 / 0.05), transparent 60%),
-    var(--navy-950);
-  background-attachment: fixed;
-  -webkit-font-smoothing: antialiased;
-}
-
-::selection {
-  background: rgb(42 168 224 / 0.35);
-}
-
-:focus-visible {
-  outline: 2px solid var(--ice-400);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-/* One elevation step, used by Card and panels. */
-.surface {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.012));
-  border: 1px solid rgb(148 163 184 / 0.12);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 16px 36px -22px rgb(2 6 23 / 0.9);
-}
-
-.tnum {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Sections rise in once, staggered by --i. Live dots pulse. Both off under reduced motion. */
-@media (prefers-reduced-motion: no-preference) {
-  .rise {
-    animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: calc(var(--i, 0) * 60ms);
-  }
-  .live-dot::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 9999px;
-    background: inherit;
-    animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-  }
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes ping {
-  75%,
-  100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-}
-
-/* ── Themes ──────────────────────────────────────────────────────────────────
-   data-theme picks the palette, data-mode picks light or dark. Components only
-   use navy-* (surfaces), ice-* (accent) and slate-* (text), so swapping these
-   variables re-skins the whole app. --glow is an "r g b" triplet for gradients.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-:root {
-  --glow: 42 168 224;
-  --chart-1: #1f95cc;
-  --chart-2: #c47a08;
-  --map-marker: #0a1628;
-}
-
-/* Ice (original) */
-html[data-theme="ice"][data-mode="dark"] {
-  --navy-950: #060c18; --navy-900: #0a1628; --navy-800: #11213b; --navy-700: #1b3052;
-  --ice-300: #9fdcf5; --ice-400: #5cc4ef; --ice-500: #2aa8e0;
-  --glow: 42 168 224; --chart-1: #1f95cc; --chart-2: #c47a08;
-}
-html[data-theme="ice"][data-mode="light"] {
-  --navy-950: #f3f7fb; --navy-900: #ffffff; --navy-800: #e9f0f7; --navy-700: #d5e1ec;
-  --ice-300: #075985; --ice-400: #0369a1; --ice-500: #0284c7;
-  --glow: 2 132 199; --chart-1: #0284c7; --chart-2: #b45309;
-}
-
-/* Graphite + expedition orange */
-html[data-theme="graphite"][data-mode="dark"] {
-  --navy-950: #0c0c0e; --navy-900: #151518; --navy-800: #1e1e22; --navy-700: #2c2c32;
-  --ice-300: #fdba74; --ice-400: #fb923c; --ice-500: #f97316;
-  --glow: 249 115 22; --chart-1: #d9650c; --chart-2: #2f7fc4;
-}
-html[data-theme="graphite"][data-mode="light"] {
-  --navy-950: #f5f5f4; --navy-900: #ffffff; --navy-800: #ededec; --navy-700: #dcdcda;
-  --ice-300: #9a3412; --ice-400: #c2410c; --ice-500: #ea580c;
-  --glow: 234 88 12; --chart-1: #c2410c; --chart-2: #1d6fb8;
-}
-
-/* Polar blue */
-html[data-theme="polar"][data-mode="dark"] {
-  --navy-950: #0a0d14; --navy-900: #10151f; --navy-800: #182030; --navy-700: #243049;
-  --ice-300: #bfdbfe; --ice-400: #93c5fd; --ice-500: #3b82f6;
-  --glow: 59 130 246; --chart-1: #2f6fe0; --chart-2: #bf7614;
-}
-html[data-theme="polar"][data-mode="light"] {
-  --navy-950: #f7f8fa; --navy-900: #ffffff; --navy-800: #eef1f6; --navy-700: #dde3ed;
-  --ice-300: #1e3a8a; --ice-400: #1d4ed8; --ice-500: #2563eb;
-  --glow: 37 99 235; --chart-1: #2563eb; --chart-2: #b45309;
-}
-
-/* Aurora green */
-html[data-theme="aurora"][data-mode="dark"] {
-  --navy-950: #081012; --navy-900: #0d181b; --navy-800: #142327; --navy-700: #1f3338;
-  --ice-300: #a7f3d0; --ice-400: #6ee7b7; --ice-500: #10b981;
-  --glow: 16 185 129; --chart-1: #10a371; --chart-2: #c77a19;
-}
-html[data-theme="aurora"][data-mode="light"] {
-  --navy-950: #f3f8f6; --navy-900: #ffffff; --navy-800: #e8f1ee; --navy-700: #d3e3de;
-  --ice-300: #065f46; --ice-400: #047857; --ice-500: #059669;
-  --glow: 5 150 105; --chart-1: #047857; --chart-2: #b45309;
-}
-
-/* Saffron on ink */
-html[data-theme="saffron"][data-mode="dark"] {
-  --navy-950: #0c0a09; --navy-900: #161311; --navy-800: #201b18; --navy-700: #2f2823;
-  --ice-300: #fde68a; --ice-400: #fbbf24; --ice-500: #f59e0b;
-  --glow: 245 158 11; --chart-1: #c47a08; --chart-2: #2f7fc4;
-}
-html[data-theme="saffron"][data-mode="light"] {
-  --navy-950: #faf8f5; --navy-900: #ffffff; --navy-800: #f1ede7; --navy-700: #e2dcd3;
-  --ice-300: #92400e; --ice-400: #b45309; --ice-500: #d97706;
-  --glow: 217 119 6; --chart-1: #b45309; --chart-2: #1d6fb8;
-}
-
-/* Light mode: invert the text scale and deepen the status tints so they stay readable. */
-html[data-mode="light"] {
-  color-scheme: light;
-  --color-slate-50: #0b1220; --color-slate-100: #111827; --color-slate-200: #1f2937;
-  --color-slate-300: #334155; --color-slate-400: #4b5563; --color-slate-500: #6b7280;
-  --color-slate-600: #9ca3af;
-  --color-white: #0f172a;
-  --color-red-200: #991b1b; --color-red-300: #b91c1c; --color-red-950: #fee2e2;
-  --color-amber-200: #92400e; --color-amber-300: #b45309;
-  --color-emerald-200: #065f46; --color-emerald-300: #047857;
-  --color-sky-200: #bae6fd;
-  --map-marker: #ffffff;
-}
-html[data-mode="dark"] {
-  color-scheme: dark;
-}
-
-html[data-mode="light"] body {
-  color: #1f2937;
-}
-html[data-mode="light"] .surface {
-  background: var(--navy-900);
-  border-color: rgb(15 23 42 / 0.09);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -20px rgb(15 23 42 / 0.18);
-}
-html[data-mode="light"] .dark-tiles {
-  filter: saturate(0.35) brightness(1.02);
-}
-
-/* The page glow follows the accent. */
-body {
-  background:
-    radial-gradient(1200px 520px at 70% -10%, rgb(var(--glow) / 0.1), transparent 60%),
-    radial-gradient(900px 480px at -10% 110%, rgb(var(--glow) / 0.05), transparent 60%),
-    var(--navy-950);
-  background-attachment: fixed;
-  transition: background-color 0.2s ease;
-}

@@ -30,7 +30,7 @@ export function SosPanel() {
   const best = nearest?.[0];
 
   return (
-    <section className="mt-6 grid gap-4 rounded-xl border border-red-500/40 bg-red-950/30 p-4 lg:grid-cols-[1fr_1.2fr]">
+    <section className="mt-6 grid gap-4 surface rounded-2xl border-l-4 border-l-red-500 p-4 md:p-5 lg:grid-cols-[1fr_1.2fr]">
       <div>
         <div className="flex items-center gap-2 text-red-300">
           <Siren size={18} /> <span className="font-semibold">{t("SOS from {name}", { name: sos.teamName ?? sos.fromName })}</span>

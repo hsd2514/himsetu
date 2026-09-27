@@ -87,13 +87,13 @@ export function useThemeColors() {
       const s = getComputedStyle(document.documentElement);
       const v = (name) => s.getPropertyValue(name).trim();
       setColors({
-        bg: v("--navy-950"),
-        surface: v("--navy-900"),
-        raised: v("--navy-800"),
-        line: v("--navy-700"),
-        accent: v("--ice-500"),
-        accentSoft: v("--ice-400"),
-        accentStrong: v("--ice-300"),
+        bg: v("--bg"),
+        surface: v("--panel"),
+        raised: v("--raised"),
+        line: v("--border"),
+        accent: v("--accent"),
+        accentSoft: v("--accent-hover"),
+        accentStrong: v("--accent-text"),
         chart1: v("--chart-1"),
         chart2: v("--chart-2"),
         marker: v("--map-marker"),

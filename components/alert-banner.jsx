@@ -15,8 +15,10 @@ export function AlertBanner() {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#fff]",
-        top.severity === "critical" ? "bg-red-700" : "bg-amber-700"
+        "flex items-center gap-2 border-b px-4 py-2 text-sm font-medium backdrop-blur",
+        top.severity === "critical"
+          ? "border-red-500/30 bg-[color-mix(in_srgb,var(--panel)_82%,#ef4444)] text-red-200"
+          : "border-amber-500/30 bg-[color-mix(in_srgb,var(--panel)_84%,#f59e0b)] text-amber-200"
       )}
       role="alert"
     >
@@ -25,7 +27,7 @@ export function AlertBanner() {
       {alerts.length > 1 && <span className="shrink-0 opacity-80">{t("+{n} more", { n: alerts.length - 1 })}</span>}
       <button
         onClick={() => resolve({ id: top._id })}
-        className="ml-auto flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs hover:bg-white/15"
+        className="ml-auto flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs hover:bg-white/10"
       >
         <X size={14} /> {t("Resolve")}
       </button>
