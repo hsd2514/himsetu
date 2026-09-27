@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "forecast:export": "node --env-file-if-exists=.env.local scripts/timesfm.mjs export",
+    "forecast:import": "node --env-file-if-exists=.env.local scripts/timesfm.mjs import"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
