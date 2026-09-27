@@ -1,7 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+const HOPS = ["warehouse", "port", "ship_hold", "helideck", "station"];
 const HOP_STATION = { warehouse: "GOA", port: "CPT", ship_hold: "SHIP", helideck: "SHIP" };
+const MAX_NOTE = 200;
+
+/** Labels are printed upper-case; accept what a person types or a scanner reads. */
+const normalizeLabel = (s) => s.trim().toUpperCase();
 
 export const list = query({
   args: {},
@@ -27,7 +32,7 @@ export const get = query({
 export const byQr = query({
   args: { qrId: v.string() },
   handler: async (ctx, { qrId }) =>
-    ctx.db.query("crates").withIndex("by_qr", (q) => q.eq("qrId", qrId.trim())).first(),
+    ctx.db.query("crates").withIndex("by_qr", (q) => q.eq("qrId", normalizeLabel(qrId))).first(),
 });
 
 export const create = mutation({
@@ -57,7 +62,11 @@ export const create = mutation({
   },
 });
 
-/** Log a custody handover. Rejects going backwards in the chain. */
+/**
+ * Log a custody handover. Hops only move forward (skipping one is allowed, e.g. a
+ * crate craned straight from the hold to the station), so a repeat scan or a
+ * double tap never adds a duplicate event.
+ */
 export const scan = mutation({
   args: {
     qrId: v.string(),
@@ -66,12 +75,21 @@ export const scan = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx, { qrId, hop, scannedBy, note }) => {
-    const crate = await ctx.db.query("crates").withIndex("by_qr", (q) => q.eq("qrId", qrId.trim())).first();
-    if (!crate) throw new Error(`No crate with label ${qrId}`);
+    const label = normalizeLabel(qrId);
+    const crate = await ctx.db.query("crates").withIndex("by_qr", (q) => q.eq("qrId", label)).first();
+    if (!crate) throw new Error(`No crate with label ${label}`);
+    const from = HOPS.indexOf(crate.status);
+    const to = HOPS.indexOf(hop);
+    if (to === from) throw new Error(`${label} is already logged at this hop`);
+    if (to < from) throw new Error(`${label} is past this hop; custody only moves forward`);
+    const who = scannedBy.trim();
+    if (!who) throw new Error("Scanner name is required");
+    const text = note?.trim().slice(0, MAX_NOTE) || undefined;
+
     const stationCode = HOP_STATION[hop] ?? crate.destination;
-    await ctx.db.insert("events", { crateId: crate._id, hop, stationCode, scannedBy, note, ts: Date.now() });
+    await ctx.db.insert("events", { crateId: crate._id, hop, stationCode, scannedBy: who, note: text, ts: Date.now() });
     await ctx.db.patch(crate._id, { status: hop, currentStation: stationCode });
-    return crate._id;
+    return { id: crate._id, qrId: label, item: crate.item, hop };
   },
 });
 
