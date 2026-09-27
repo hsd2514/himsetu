@@ -155,4 +155,10 @@ export default defineSchema({
     demoSpeed: v.number(), // 1 = real time, 60 = one real second is one mission minute
     demoStartTs: v.number(),
   }),
+
+  // Persistent monotonic counters — never reset on row deletion.
+  counters: defineTable({
+    name: v.string(),   // e.g. "crate_seq"
+    value: v.number(),  // current sequence value (1-based)
+  }).index("by_name", ["name"]),
 });
