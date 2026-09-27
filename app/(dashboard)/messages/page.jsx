@@ -9,6 +9,7 @@ import { Composer, useSend } from "@/components/composer";
 import { MessageRow } from "@/components/message-row";
 import { PassCountdowns } from "@/components/pass-countdown";
 import { useMe, useNow } from "@/components/use-me";
+import { useT } from "@/components/language-context";
 
 export default function MessagesPage() {
   const { me, node, keyReady } = useMe();
@@ -19,36 +20,37 @@ export default function MessagesPage() {
   const now = useNow(1000);
   const [to, setTo] = useState("station:GOA");
   const [priority, setPriority] = useState("ops");
+  const t = useT();
 
   const [toType, toId] = to.split(":");
   const remote = me && me.stationCode !== "GOA" ? me.stationCode : null;
 
   return (
     <>
-      <PageHeader title="Messages" subtitle={`As ${me?.name ?? "…"} (${node.label}). Messages from the ice wait for a satellite pass.`} />
+      <PageHeader title={t("Messages")} subtitle={t("As {name} ({node}). Messages from the ice wait for a satellite pass.", { name: me?.name ?? "…", node: t(node.label) })} />
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Card className="grid gap-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="To">
+            <Field label={t("To")}>
               <Select value={to} onChange={(e) => setTo(e.target.value)}>
-                <optgroup label="Stations">
-                  {["GOA", "SHIP", "MAITRI", "BHARATI"].map((s) => <option key={s} value={`station:${s}`}>{s === "GOA" ? "NCPOR Goa Hub" : s[0] + s.slice(1).toLowerCase()}</option>)}
+                <optgroup label={t("Stations")}>
+                  {["GOA", "SHIP", "MAITRI", "BHARATI"].map((s) => <option key={s} value={`station:${s}`}>{t(s === "GOA" ? "NCPOR Goa Hub" : s[0] + s.slice(1).toLowerCase())}</option>)}
                 </optgroup>
-                <optgroup label="Teams">
-                  {teams.filter((t) => t.memberIds.length).map((t) => <option key={t._id} value={`team:${t._id}`}>{t.name}</option>)}
+                <optgroup label={t("Teams")}>
+                  {teams.filter((tm) => tm.memberIds.length).map((tm) => <option key={tm._id} value={`team:${tm._id}`}>{tm.name}</option>)}
                 </optgroup>
-                <optgroup label="People">
+                <optgroup label={t("People")}>
                   {people.filter((p) => p._id !== me?._id).map((p) => <option key={p._id} value={`user:${p._id}`}>{p.name}</option>)}
                 </optgroup>
-                <option value="broadcast:all">Broadcast to everyone</option>
+                <option value="broadcast:all">{t("Broadcast to everyone")}</option>
               </Select>
             </Field>
-            <Field label="Priority">
+            <Field label={t("Priority")}>
               <Select value={priority} onChange={(e) => setPriority(e.target.value)}>
                 <option value="sos">SOS</option>
-                <option value="medical">Medical</option>
-                <option value="ops">Operations</option>
-                <option value="normal">Normal</option>
+                <option value="medical">{t("Medical")}</option>
+                <option value="ops">{t("Operations")}</option>
+                <option value="normal">{t("Normal")}</option>
               </Select>
             </Field>
           </div>
@@ -56,7 +58,7 @@ export default function MessagesPage() {
           {messages === undefined ? (
             <div className="h-40 animate-pulse rounded-lg bg-navy-800" />
           ) : messages.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-400">No messages yet for {me?.name}.</p>
+            <p className="py-8 text-center text-sm text-slate-400">{t("No messages yet for {name}.", { name: me?.name ?? "" })}</p>
           ) : (
             <ul className="grid gap-2">
               {messages.map((m) => <MessageRow key={m._id} m={m} me={me} now={now} />)}
@@ -66,7 +68,7 @@ export default function MessagesPage() {
         <div className="grid content-start gap-3">
           {remote ? <PassCountdowns only={remote} compact /> : <PassCountdowns compact />}
           <p className="text-xs leading-relaxed text-slate-400">
-            Order on every pass: SOS, medical, operations, normal, then oldest first. Up to 340 bytes per message and 4 messages per pass. Goa to Goa goes instantly over fibre.
+            {t("Order on every pass: SOS, medical, operations, normal, then oldest first. Up to 340 bytes per message and 4 messages per pass. Goa to Goa goes instantly over fibre.")}
           </p>
         </div>
       </div>

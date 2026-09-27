@@ -18,14 +18,14 @@
   --color-ice-300: var(--ice-300);
   --color-ice-400: var(--ice-400);
   --color-ice-500: var(--ice-500);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-geist-sans), var(--font-devanagari);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--navy-950);
   color: #e2e8f0;
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), var(--font-devanagari), system-ui, sans-serif;
 }
 
 /* OSM tiles recoloured to sit in the navy theme. */

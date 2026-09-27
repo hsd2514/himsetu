@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api } from "@/convex/_generated/api";
 import { fmtDate } from "@/lib/time";
+import { useT } from "@/components/language-context";
 
 // Validated on the #0a1628 surface (dark band, CVD dE 23.9). Stock is one entity:
 // solid = measured, dashed = Holt-Winters. TimesFM gets the second hue.
@@ -31,6 +32,7 @@ function TooltipBox({ active, payload, label, unit }) {
 /** Stock level: 60 days measured, then 120 days forecast, against the safety level. */
 export function BurnDownChart({ stationCode, item }) {
   const data = useQuery(api.forecast.burnDown, { stationCode, item });
+  const t = useT();
 
   const rows = useMemo(() => {
     if (!data) return [];
@@ -43,23 +45,23 @@ export function BurnDownChart({ stationCode, item }) {
   }, [data]);
 
   if (data === undefined) return <div className="h-72 animate-pulse rounded-lg bg-navy-800" />;
-  if (data === null) return <p className="text-sm text-slate-400">No stock record for this item.</p>;
+  if (data === null) return <p className="text-sm text-slate-400">{t("No stock record for this item.")}</p>;
 
   const out = data.timesfm?.stockOutDate ?? data.holtwinters.stockOutDate;
-  const name = { diesel: "Diesel", food: "Food", medical: "Medical kits", spares: "Spares" }[item];
-  const station = stationCode === "MAITRI" ? "Maitri" : "Bharati";
+  const name = t({ diesel: "Diesel", food: "Food", medical: "Medical kits", spares: "Spares" }[item]);
+  const station = t(stationCode === "MAITRI" ? "Maitri" : "Bharati");
 
   return (
     <figure>
       <figcaption className="mb-3">
         <div className="text-lg font-semibold text-slate-100">
-          {out ? `${name} at ${station} hits its safety level on ${fmtDate(out)}` : `${name} at ${station} stays above safety for 120 days`}
+          {out ? t("{item} at {station} hits its safety level on {date}", { item: name, station, date: fmtDate(out) }) : t("{item} at {station} stays above safety for 120 days", { item: name, station })}
         </div>
         <div className="mt-2 flex flex-wrap gap-4 text-xs text-slate-400">
-          <span className="flex items-center gap-2"><span className="h-0.5 w-5" style={{ background: STOCK }} />Measured stock</span>
-          <span className="flex items-center gap-2"><span className="h-0 w-5 border-t-2 border-dashed" style={{ borderColor: STOCK }} />Holt-Winters forecast</span>
-          {data.timesfm && <span className="flex items-center gap-2"><span className="h-0.5 w-5" style={{ background: TIMESFM }} />TimesFM-3 forecast</span>}
-          <span className="flex items-center gap-2"><span className="h-0 w-5 border-t-2 border-dotted" style={{ borderColor: SAFETY }} />Safety level</span>
+          <span className="flex items-center gap-2"><span className="h-0.5 w-5" style={{ background: STOCK }} />{t("Measured stock")}</span>
+          <span className="flex items-center gap-2"><span className="h-0 w-5 border-t-2 border-dashed" style={{ borderColor: STOCK }} />{t("Holt-Winters forecast")}</span>
+          {data.timesfm && <span className="flex items-center gap-2"><span className="h-0.5 w-5" style={{ background: TIMESFM }} />{t("TimesFM-3 forecast")}</span>}
+          <span className="flex items-center gap-2"><span className="h-0 w-5 border-t-2 border-dotted" style={{ borderColor: SAFETY }} />{t("Safety level")}</span>
         </div>
       </figcaption>
       <div className="h-72">
@@ -87,10 +89,10 @@ export function BurnDownChart({ stationCode, item }) {
               y={data.safetyLevel}
               stroke={SAFETY}
               strokeDasharray="2 4"
-              label={{ value: "Safety", position: "insideTopRight", fill: "#fca5a5", fontSize: 11 }}
+              label={{ value: t("Safety"), position: "insideTopRight", fill: "#fca5a5", fontSize: 11 }}
             />
-            <ReferenceLine x={rows.find((r) => r.hw !== undefined)?.date} stroke="#475569" label={{ value: "Today", position: "insideTopLeft", fill: "#94a3b8", fontSize: 11 }} />
-            <Line type="monotone" dataKey="actual" name="Measured" stroke={STOCK} strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
+            <ReferenceLine x={rows.find((r) => r.hw !== undefined)?.date} stroke="#475569" label={{ value: t("Today"), position: "insideTopLeft", fill: "#94a3b8", fontSize: 11 }} />
+            <Line type="monotone" dataKey="actual" name={t("Measured")} stroke={STOCK} strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
             <Line type="monotone" dataKey="hw" name="Holt-Winters" stroke={STOCK} strokeWidth={2} strokeDasharray="6 4" dot={false} isAnimationActive={false} />
             {data.timesfm && <Line type="monotone" dataKey="tfm" name="TimesFM-3" stroke={TIMESFM} strokeWidth={2} dot={false} isAnimationActive={false} />}
           </LineChart>
