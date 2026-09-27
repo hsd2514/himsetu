@@ -11,6 +11,7 @@ import { PassCountdowns } from "@/components/pass-countdown";
 import { SosPanel } from "@/components/sos-panel";
 import { LinkQueue } from "@/components/link-queue";
 import { useStation } from "@/components/station-context";
+import { useT } from "@/components/language-context";
 
 function Kpi({ label, value, tone }) {
   return (
@@ -23,6 +24,7 @@ function Kpi({ label, value, tone }) {
 
 export default function MissionPage() {
   const { node } = useStation();
+  const t = useT();
   const stations = useQuery(api.stations.list);
   const teams = useQuery(api.people.teams);
   const crateStats = useQuery(api.crates.stats);
@@ -40,38 +42,38 @@ export default function MissionPage() {
   if (stations?.length === 0) {
     return (
       <Card className="mx-auto mt-16 max-w-md text-center">
-        <h2 className="text-lg font-semibold">No mission data yet</h2>
-        <p className="mt-2 text-sm text-slate-400">Load the simulated season: stations, crates, field teams and 60 days of stock use.</p>
-        <Button className="mt-4" onClick={() => seed()}>Load demo data</Button>
+        <h2 className="text-lg font-semibold">{t("No mission data yet")}</h2>
+        <p className="mt-2 text-sm text-slate-400">{t("Load the simulated season: stations, crates, field teams and 60 days of stock use.")}</p>
+        <Button className="mt-4" onClick={() => seed()}>{t("Load demo data")}</Button>
       </Card>
     );
   }
 
   return (
     <>
-      <PageHeader title={node.code === "GOA" ? "NCPOR Goa Hub" : node.label} subtitle="Every crate, drum and person on one map, refreshed at each satellite pass.">
+      <PageHeader title={t(node.code === "GOA" ? "NCPOR Goa Hub" : node.label)} subtitle={t("Every crate, drum and person on one map, refreshed at each satellite pass.")}>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setSpeed({ demoSpeed: speed === 60 ? 1 : 60 })}>
-            <Gauge size={14} /> {speed === 60 ? "Demo speed 60×" : "Real time"}
+            <Gauge size={14} /> {t(speed === 60 ? "Demo speed 60×" : "Real time")}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => reset()}>
-            <RotateCcw size={14} /> Reset demo
+            <RotateCcw size={14} /> {t("Reset demo")}
           </Button>
         </div>
       </PageHeader>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi label="Crates in transit" value={crateStats?.inTransit} />
-        <Kpi label="Stock-out risks (60 d)" value={risks} tone={risks ? "text-amber-300" : undefined} />
-        <Kpi label="Messages waiting for a pass" value={queue?.length} tone={queue?.length ? "text-ice-300" : undefined} />
-        <Kpi label="Open alerts" value={alerts?.length} tone={alerts?.length ? "text-red-300" : undefined} />
+        <Kpi label={t("Crates in transit")} value={crateStats?.inTransit} />
+        <Kpi label={t("Stock-out risks (60 d)")} value={risks} tone={risks ? "text-amber-300" : undefined} />
+        <Kpi label={t("Messages waiting for a pass")} value={queue?.length} tone={queue?.length ? "text-ice-300" : undefined} />
+        <Kpi label={t("Open alerts")} value={alerts?.length} tone={alerts?.length ? "text-red-300" : undefined} />
       </div>
 
       <div className="mt-6">
         <PassCountdowns />
         <p className="mt-2 text-xs text-slate-500">
-          SGP4 on Iridium NEXT TLEs ({passes?.tleSource === "celestrak" ? "live from CelesTrak" : "bundled snapshot"}).
-          {speed === 60 && " Demo mode: one real second is one mission minute."}
+          {t("SGP4 on Iridium NEXT TLEs ({source}).", { source: t(passes?.tleSource === "celestrak" ? "live from CelesTrak" : "bundled snapshot") })}
+          {speed === 60 && ` ${t("Demo mode: one real second is one mission minute.")}`}
         </p>
       </div>
 
@@ -83,8 +85,8 @@ export default function MissionPage() {
         </Card>
         <Card>
           <div className="flex items-center justify-between">
-            <CardTitle>Link queue</CardTitle>
-            <Badge tone="ice">SOS goes first</Badge>
+            <CardTitle>{t("Link queue")}</CardTitle>
+            <Badge tone="ice">{t("SOS goes first")}</Badge>
           </div>
           <LinkQueue />
         </Card>

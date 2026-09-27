@@ -8,6 +8,7 @@ import { useSend } from "@/components/composer";
 import { MessageRow } from "@/components/message-row";
 import { useMe, useNow } from "@/components/use-me";
 import { useStation } from "@/components/station-context";
+import { useT } from "@/components/language-context";
 
 // Fallback position near Maitri if the browser has no GPS (simulated, shown as such).
 const FALLBACK = { lat: -70.812, lon: 11.61, simulated: true };
@@ -40,6 +41,7 @@ export default function FieldPage() {
   const now = useNow(1000);
   const [online, setOnline] = useState(true);
   const [flash, setFlash] = useState(null);
+  const t = useT();
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -59,6 +61,7 @@ export default function FieldPage() {
   async function preset(kind) {
     if (!me || !gps) return;
     const coords = `${gps.lat.toFixed(4)},${gps.lon.toFixed(4)}`;
+    // Message text stays English: Devanagari is 3 bytes a letter against the 340-byte packet.
     const map = {
       sos: { priority: "sos", text: `SOS. ${me.name} needs immediate help at ${coords}.` },
       help: { priority: "medical", text: `Need help, not critical. ${me.name} at ${coords}.` },
@@ -67,7 +70,7 @@ export default function FieldPage() {
     }[kind];
     await checkIn({ personId: me._id, lat: gps.lat, lon: gps.lon });
     const err = await send({ toType: "station", toId: "GOA", ...map, lat: gps.lat, lon: gps.lon });
-    setFlash(err ?? (kind === "sos" ? "SOS queued at the front of the link. It goes on the next pass." : "Check-in queued for the next pass."));
+    setFlash(err ?? t(kind === "sos" ? "SOS queued at the front of the link. It goes on the next pass." : "Check-in queued for the next pass."));
   }
 
   const outgoing = (messages ?? []).filter((m) => m.outgoing).slice(0, 4);
@@ -76,14 +79,14 @@ export default function FieldPage() {
     <div className="mx-auto grid max-w-md gap-4">
       {!online && (
         <div className="flex items-center gap-2 rounded-lg bg-amber-700 px-3 py-2 text-sm text-white">
-          <WifiOff size={16} /> Offline. Actions are kept on this phone and sent when a link opens.
+          <WifiOff size={16} /> {t("Offline. Actions are kept on this phone and sent when a link opens.")}
         </div>
       )}
       <div>
-        <h1 className="text-xl font-semibold">{me?.name ?? "Field team"}</h1>
+        <h1 className="text-xl font-semibold">{me?.name ?? t("Field team")}</h1>
         <p className="flex items-center gap-1 text-xs text-slate-400">
           <MapPin size={12} />
-          {gps ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}${gps.simulated ? " (simulated position near Maitri)" : ""}` : "Locating…"}
+          {gps ? `${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}${gps.simulated ? ` ${t("(simulated position near Maitri)")}` : ""}` : t("Locating…")}
         </p>
       </div>
 
@@ -97,13 +100,13 @@ export default function FieldPage() {
 
       <div className="grid grid-cols-3 gap-2">
         <button onClick={() => preset("safe")} className="grid place-items-center gap-1 rounded-xl border border-emerald-500/40 bg-emerald-500/10 py-4 text-sm text-emerald-200 active:scale-[0.98]">
-          <CircleCheck size={20} /> Safe
+          <CircleCheck size={20} /> {t("Safe")}
         </button>
         <button onClick={() => preset("delayed")} className="grid place-items-center gap-1 rounded-xl border border-amber-500/40 bg-amber-500/10 py-4 text-sm text-amber-200 active:scale-[0.98]">
-          <Clock3 size={20} /> Delayed
+          <Clock3 size={20} /> {t("Delayed")}
         </button>
         <button onClick={() => preset("help")} className="grid place-items-center gap-1 rounded-xl border border-red-500/40 bg-red-500/10 py-4 text-sm text-red-200 active:scale-[0.98]">
-          <LifeBuoy size={20} /> Need help
+          <LifeBuoy size={20} /> {t("Need help")}
         </button>
       </div>
       {flash && <p className="rounded-lg bg-navy-800 px-3 py-2 text-sm text-slate-200">{flash}</p>}
