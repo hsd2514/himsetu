@@ -32,3 +32,49 @@ body {
 .dark-tiles {
   filter: invert(1) hue-rotate(190deg) brightness(0.85) saturate(0.6);
 }
+
+/* ── Issue #42: Print-only crate label ──────────────────────────────────────
+   When window.print() is called from /cargo/new, hide every part of the UI
+   except #print-label itself.  The page is sized exactly to the sticker so
+   the label fills the sheet and nothing spills onto a second page.
+   Screen layout is completely unaffected by these rules.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* @page must be top-level (not nested inside @media) to satisfy CSS
+   nesting rules and Turbopack's CSS parser.  It still only applies to
+   paged/print output — no effect on screen rendering. */
+@page {
+  size: 100mm 60mm;
+  margin: 0;
+}
+
+@media print {
+  /* Suppress every element by default … */
+  body * {
+    visibility: hidden;
+  }
+
+  /* … then reveal only the label and its descendants */
+  #print-label,
+  #print-label * {
+    visibility: visible;
+  }
+
+  /* Pull the label to the top-left corner of the page */
+  #print-label {
+    position: fixed;
+    inset: 0;
+    width: 100mm;
+    height: 60mm;
+    box-sizing: border-box;
+    background: #ffffff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    /* Remove screen-only rounding / shadow that could bleed outside */
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    /* Prevent the label from being split across pages */
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
