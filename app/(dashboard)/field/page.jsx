@@ -78,7 +78,7 @@ export default function FieldPage() {
   return (
     <div className="mx-auto grid max-w-md gap-4">
       {!online && (
-        <div className="flex items-center gap-2 rounded-lg bg-amber-700 px-3 py-2 text-sm text-white">
+        <div className="flex items-center gap-2 rounded-lg bg-amber-700 px-3 py-2 text-sm text-[#fff]">
           <WifiOff size={16} /> {t("Offline. Actions are kept on this phone and sent when a link opens.")}
         </div>
       )}
@@ -93,7 +93,7 @@ export default function FieldPage() {
       <button
         onClick={() => preset("sos")}
         disabled={!keyReady || !gps}
-        className="grid aspect-square w-full place-items-center rounded-full bg-red-600 text-4xl font-bold tracking-widest text-white shadow-[0_20px_60px_-15px_rgba(220,38,38,0.6)] transition active:scale-[0.98] disabled:opacity-50"
+        className="grid aspect-square w-full place-items-center rounded-full bg-red-600 text-4xl font-bold tracking-widest text-[#fff] shadow-[0_20px_60px_-15px_rgba(220,38,38,0.6)] transition active:scale-[0.98] disabled:opacity-50"
       >
         SOS
       </button>

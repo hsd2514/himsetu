@@ -15,7 +15,7 @@ export function AlertBanner() {
   return (
     <div
       className={cn(
-        "flex items-center gap-2 px-4 py-2 text-sm font-medium text-white",
+        "flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#fff]",
         top.severity === "critical" ? "bg-red-700" : "bg-amber-700"
       )}
       role="alert"

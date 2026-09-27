@@ -3,6 +3,7 @@ import "./globals.css";
 import { ConvexClientProvider } from "@/components/convex-provider";
 import { StationProvider } from "@/components/station-context";
 import { LanguageProvider } from "@/components/language-context";
+import { ThemeProvider, THEME_BOOT } from "@/components/theme-context";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -17,13 +18,19 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="ice" data-mode="dark" suppressHydrationWarning>
+      <head>
+        {/* Applies the saved palette before first paint, so there is no flash of the default theme. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+      </head>
       <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} antialiased`}>
-        <ConvexClientProvider>
-          <LanguageProvider>
-            <StationProvider>{children}</StationProvider>
-          </LanguageProvider>
-        </ConvexClientProvider>
+        <ThemeProvider>
+          <ConvexClientProvider>
+            <LanguageProvider>
+              <StationProvider>{children}</StationProvider>
+            </LanguageProvider>
+          </ConvexClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

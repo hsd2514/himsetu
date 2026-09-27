@@ -1,5 +1,6 @@
 "use client";
 import "leaflet/dist/leaflet.css";
+import { useThemeColors } from "@/components/theme-context";
 import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip } from "react-leaflet";
 
 const ROUTE = ["GOA", "CPT", "SHIP", "MAITRI"];
@@ -10,6 +11,8 @@ const ROUTE2 = ["SHIP", "BHARATI"];
  * field picture with a line from an SOS to the nearest responder.
  */
 export default function MapInner({ stations = [], teams = [], sos, center = [-25, 45], zoom = 2, height = 380 }) {
+  const c = useThemeColors() ?? { surface: "#0a1628", accent: "#2aa8e0", accentSoft: "#5cc4ef", accentStrong: "#9fdcf5", marker: "#0a1628", light: false };
+  const edge = c.light ? "#1f2937" : "#e2e8f0";
   const at = (code) => stations.find((s) => s.code === code);
   const line = (codes) => codes.map(at).filter(Boolean).map((s) => [s.lat, s.lon]);
 
@@ -19,7 +22,7 @@ export default function MapInner({ stations = [], teams = [], sos, center = [-25
       zoom={zoom}
       scrollWheelZoom={false}
       worldCopyJump
-      style={{ height, width: "100%", borderRadius: 12, background: "#0a1628" }}
+      style={{ height, width: "100%", borderRadius: 12, background: c.surface }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -28,8 +31,8 @@ export default function MapInner({ stations = [], teams = [], sos, center = [-25
       />
       {stations.length > 0 && (
         <>
-          <Polyline positions={line(ROUTE)} pathOptions={{ color: "#5cc4ef", weight: 2, dashArray: "6 6" }} />
-          <Polyline positions={line(ROUTE2)} pathOptions={{ color: "#5cc4ef", weight: 2, dashArray: "6 6" }} />
+          <Polyline positions={line(ROUTE)} pathOptions={{ color: c.accentSoft, weight: 2, dashArray: "6 6" }} />
+          <Polyline positions={line(ROUTE2)} pathOptions={{ color: c.accentSoft, weight: 2, dashArray: "6 6" }} />
         </>
       )}
       {stations.map((s) => (
@@ -37,7 +40,7 @@ export default function MapInner({ stations = [], teams = [], sos, center = [-25
           key={s._id}
           center={[s.lat, s.lon]}
           radius={s.type === "hub" ? 9 : 7}
-          pathOptions={{ color: "#9fdcf5", fillColor: s.type === "hub" ? "#2aa8e0" : "#0a1628", fillOpacity: 1, weight: 2 }}
+          pathOptions={{ color: c.accentStrong, fillColor: s.type === "hub" ? c.accent : c.marker, fillOpacity: 1, weight: 2 }}
         >
           <Tooltip direction="top" offset={[0, -6]}>{s.name}</Tooltip>
         </CircleMarker>
@@ -47,7 +50,7 @@ export default function MapInner({ stations = [], teams = [], sos, center = [-25
           key={t._id}
           center={[t.lat, t.lon]}
           radius={6}
-          pathOptions={{ color: "#e2e8f0", fillColor: t.kind === "vehicle" ? "#f59e0b" : "#10b981", fillOpacity: 1, weight: 1.5 }}
+          pathOptions={{ color: edge, fillColor: t.kind === "vehicle" ? "#f59e0b" : "#10b981", fillOpacity: 1, weight: 1.5 }}
         >
           <Tooltip direction="top" offset={[0, -6]}>
             {t.name} ({t.kind === "vehicle" ? "snow vehicle" : "on foot"})

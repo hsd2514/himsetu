@@ -6,6 +6,7 @@ import { LayoutDashboard, Package, Boxes, MessageSquareLock, Siren, Snowflake, I
 import { NODES, useStation } from "@/components/station-context";
 import { LanguageToggle, useT } from "@/components/language-context";
 import { useNow } from "@/components/use-me";
+import { ThemePicker } from "@/components/theme-context";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -88,7 +89,10 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-auto hidden border-t border-white/[0.06] pt-4 text-[11px] leading-relaxed text-slate-500 md:block">
+      <div className="mt-auto grid gap-4 border-t border-white/[0.06] pt-4">
+        <ThemePicker />
+      </div>
+      <div className="hidden text-[11px] leading-relaxed text-slate-500 md:block">
         {t("Data hosted in India · ISRO EOS-04 imagery")}
         <br />
         <span className="text-slate-400">{t("Plan it in Goa. Trust it on the ice.")}</span>

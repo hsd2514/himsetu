@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 function Kpi({ label, value, tone, href }) {
   return (
-    <Link href={href} className="group bg-[#0a1323] p-4 transition-colors hover:bg-[#0e1a2f] md:p-5">
+    <Link href={href} className="group bg-navy-900 p-4 transition-colors hover:bg-navy-800 md:p-5">
       <div className="flex items-start justify-between gap-2 text-xs text-slate-400">
         {label}
         <ArrowUpRight size={14} className="shrink-0 text-slate-600 transition-colors group-hover:text-ice-300" />

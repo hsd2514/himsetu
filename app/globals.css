@@ -145,3 +145,115 @@ body {
     opacity: 0;
   }
 }
+
+/* ── Themes ──────────────────────────────────────────────────────────────────
+   data-theme picks the palette, data-mode picks light or dark. Components only
+   use navy-* (surfaces), ice-* (accent) and slate-* (text), so swapping these
+   variables re-skins the whole app. --glow is an "r g b" triplet for gradients.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --glow: 42 168 224;
+  --chart-1: #1f95cc;
+  --chart-2: #c47a08;
+  --map-marker: #0a1628;
+}
+
+/* Ice (original) */
+html[data-theme="ice"][data-mode="dark"] {
+  --navy-950: #060c18; --navy-900: #0a1628; --navy-800: #11213b; --navy-700: #1b3052;
+  --ice-300: #9fdcf5; --ice-400: #5cc4ef; --ice-500: #2aa8e0;
+  --glow: 42 168 224; --chart-1: #1f95cc; --chart-2: #c47a08;
+}
+html[data-theme="ice"][data-mode="light"] {
+  --navy-950: #f3f7fb; --navy-900: #ffffff; --navy-800: #e9f0f7; --navy-700: #d5e1ec;
+  --ice-300: #075985; --ice-400: #0369a1; --ice-500: #0284c7;
+  --glow: 2 132 199; --chart-1: #0284c7; --chart-2: #b45309;
+}
+
+/* Graphite + expedition orange */
+html[data-theme="graphite"][data-mode="dark"] {
+  --navy-950: #0c0c0e; --navy-900: #151518; --navy-800: #1e1e22; --navy-700: #2c2c32;
+  --ice-300: #fdba74; --ice-400: #fb923c; --ice-500: #f97316;
+  --glow: 249 115 22; --chart-1: #d9650c; --chart-2: #2f7fc4;
+}
+html[data-theme="graphite"][data-mode="light"] {
+  --navy-950: #f5f5f4; --navy-900: #ffffff; --navy-800: #ededec; --navy-700: #dcdcda;
+  --ice-300: #9a3412; --ice-400: #c2410c; --ice-500: #ea580c;
+  --glow: 234 88 12; --chart-1: #c2410c; --chart-2: #1d6fb8;
+}
+
+/* Polar blue */
+html[data-theme="polar"][data-mode="dark"] {
+  --navy-950: #0a0d14; --navy-900: #10151f; --navy-800: #182030; --navy-700: #243049;
+  --ice-300: #bfdbfe; --ice-400: #93c5fd; --ice-500: #3b82f6;
+  --glow: 59 130 246; --chart-1: #2f6fe0; --chart-2: #bf7614;
+}
+html[data-theme="polar"][data-mode="light"] {
+  --navy-950: #f7f8fa; --navy-900: #ffffff; --navy-800: #eef1f6; --navy-700: #dde3ed;
+  --ice-300: #1e3a8a; --ice-400: #1d4ed8; --ice-500: #2563eb;
+  --glow: 37 99 235; --chart-1: #2563eb; --chart-2: #b45309;
+}
+
+/* Aurora green */
+html[data-theme="aurora"][data-mode="dark"] {
+  --navy-950: #081012; --navy-900: #0d181b; --navy-800: #142327; --navy-700: #1f3338;
+  --ice-300: #a7f3d0; --ice-400: #6ee7b7; --ice-500: #10b981;
+  --glow: 16 185 129; --chart-1: #10a371; --chart-2: #c77a19;
+}
+html[data-theme="aurora"][data-mode="light"] {
+  --navy-950: #f3f8f6; --navy-900: #ffffff; --navy-800: #e8f1ee; --navy-700: #d3e3de;
+  --ice-300: #065f46; --ice-400: #047857; --ice-500: #059669;
+  --glow: 5 150 105; --chart-1: #047857; --chart-2: #b45309;
+}
+
+/* Saffron on ink */
+html[data-theme="saffron"][data-mode="dark"] {
+  --navy-950: #0c0a09; --navy-900: #161311; --navy-800: #201b18; --navy-700: #2f2823;
+  --ice-300: #fde68a; --ice-400: #fbbf24; --ice-500: #f59e0b;
+  --glow: 245 158 11; --chart-1: #c47a08; --chart-2: #2f7fc4;
+}
+html[data-theme="saffron"][data-mode="light"] {
+  --navy-950: #faf8f5; --navy-900: #ffffff; --navy-800: #f1ede7; --navy-700: #e2dcd3;
+  --ice-300: #92400e; --ice-400: #b45309; --ice-500: #d97706;
+  --glow: 217 119 6; --chart-1: #b45309; --chart-2: #1d6fb8;
+}
+
+/* Light mode: invert the text scale and deepen the status tints so they stay readable. */
+html[data-mode="light"] {
+  color-scheme: light;
+  --color-slate-50: #0b1220; --color-slate-100: #111827; --color-slate-200: #1f2937;
+  --color-slate-300: #334155; --color-slate-400: #4b5563; --color-slate-500: #6b7280;
+  --color-slate-600: #9ca3af;
+  --color-white: #0f172a;
+  --color-red-200: #991b1b; --color-red-300: #b91c1c; --color-red-950: #fee2e2;
+  --color-amber-200: #92400e; --color-amber-300: #b45309;
+  --color-emerald-200: #065f46; --color-emerald-300: #047857;
+  --color-sky-200: #bae6fd;
+  --map-marker: #ffffff;
+}
+html[data-mode="dark"] {
+  color-scheme: dark;
+}
+
+html[data-mode="light"] body {
+  color: #1f2937;
+}
+html[data-mode="light"] .surface {
+  background: var(--navy-900);
+  border-color: rgb(15 23 42 / 0.09);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -20px rgb(15 23 42 / 0.18);
+}
+html[data-mode="light"] .dark-tiles {
+  filter: saturate(0.35) brightness(1.02);
+}
+
+/* The page glow follows the accent. */
+body {
+  background:
+    radial-gradient(1200px 520px at 70% -10%, rgb(var(--glow) / 0.1), transparent 60%),
+    radial-gradient(900px 480px at -10% 110%, rgb(var(--glow) / 0.05), transparent 60%),
+    var(--navy-950);
+  background-attachment: fixed;
+  transition: background-color 0.2s ease;
+}

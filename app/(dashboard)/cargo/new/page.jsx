@@ -86,7 +86,7 @@ export default function NewCratePage() {
 
         {label ? (
           <div className="grid content-start gap-3">
-            <div id="print-label" className="rounded-xl bg-white p-5 text-navy-950">
+            <div id="print-label" className="rounded-xl bg-[#fff] p-5 text-[#050b18]">
               <div className="flex items-start gap-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={label.png} alt={`QR code for ${label.qrId}`} className="h-36 w-36" />
