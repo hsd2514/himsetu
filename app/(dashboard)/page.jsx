@@ -26,7 +26,7 @@ export default function MissionPage() {
   const stations = useQuery(api.stations.list);
   const teams = useQuery(api.people.teams);
   const crateStats = useQuery(api.crates.stats);
-  const inventory = useQuery(api.inventory.list);
+  const outs = useQuery(api.forecast.stockOuts);
   const queue = useQuery(api.messages.queue);
   const alerts = useQuery(api.sos.openAlerts);
   const passes = useQuery(api.passes.upcoming);
@@ -34,7 +34,7 @@ export default function MissionPage() {
   const reset = useMutation(api.seed.reset);
   const setSpeed = useMutation(api.link.setDemoSpeed);
 
-  const risks = inventory?.filter((r) => r.daysToSafety !== null && r.daysToSafety < 60).length;
+  const risks = outs?.filter((o) => o.stockOutDate && o.stockOutDate - Date.now() < 60 * 86400000).length;
   const speed = passes?.settings.demoSpeed ?? 60;
 
   if (stations?.length === 0) {
