@@ -43,5 +43,7 @@ next-env.d.ts
 # convex local backend
 .convex/
 
+# self-signed certs from `npm run dev:phone`
+/certificates
 # notebook input from `npm run forecast:export`
 /notebooks/history.json
