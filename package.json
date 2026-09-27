@@ -7,7 +7,9 @@
     "dev:phone": "next dev --experimental-https -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "forecast:export": "node --env-file-if-exists=.env.local scripts/timesfm.mjs export",
+    "forecast:import": "node --env-file-if-exists=.env.local scripts/timesfm.mjs import"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

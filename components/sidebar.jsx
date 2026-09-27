@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Package, Boxes, MessageSquareLock, Siren, Snowflake, Info } from "lucide-react";
 import { NODES, useStation } from "@/components/station-context";
+import { LanguageToggle, useT } from "@/components/language-context";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -18,14 +19,18 @@ const NAV = [
 export function Sidebar() {
   const pathname = usePathname();
   const { node, setNodeCode } = useStation();
+  const t = useT();
   return (
     <aside className="flex w-full flex-col gap-4 border-b border-navy-800 bg-navy-900 p-4 md:sticky md:top-0 md:h-screen md:w-60 md:border-b-0 md:border-r">
-      <div>
-        <div className="text-xl font-bold tracking-wider text-ice-300">HIMSETU</div>
-        <div className="text-xs text-slate-400">हिमसेतु · bridge to the ice</div>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="text-xl font-bold tracking-wider text-ice-300">HIMSETU</div>
+          <div className="text-xs text-slate-400">हिमसेतु · {t("bridge to the ice")}</div>
+        </div>
+        <LanguageToggle />
       </div>
       <label className="text-xs text-slate-400">
-        Logged in as
+        {t("Logged in as")}
         <select
           value={node.code}
           onChange={(e) => setNodeCode(e.target.value)}
@@ -33,7 +38,7 @@ export function Sidebar() {
         >
           {NODES.map((n) => (
             <option key={n.code} value={n.code}>
-              {n.label}
+              {t(n.label)}
             </option>
           ))}
         </select>
@@ -48,14 +53,14 @@ export function Sidebar() {
               pathname === href && "bg-navy-800 text-ice-300"
             )}
           >
-            <Icon size={16} /> {label}
+            <Icon size={16} /> {t(label)}
           </Link>
         ))}
       </nav>
       <div className="mt-auto hidden text-[11px] leading-relaxed text-slate-500 md:block">
-        Data hosted in India · ISRO EOS-04 imagery
+        {t("Data hosted in India · ISRO EOS-04 imagery")}
         <br />
-        Plan it in Goa. Trust it on the ice.
+        {t("Plan it in Goa. Trust it on the ice.")}
       </div>
     </aside>
   );

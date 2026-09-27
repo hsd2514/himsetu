@@ -45,3 +45,5 @@ next-env.d.ts
 
 # self-signed certs from `npm run dev:phone`
 /certificates
+# notebook input from `npm run forecast:export`
+/notebooks/history.json

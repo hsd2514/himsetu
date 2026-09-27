@@ -8,11 +8,13 @@ import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/field";
 import { HOP_LABEL, HopProgress } from "@/components/hop-progress";
+import { useT } from "@/components/language-context";
 
 export default function CargoPage() {
   const crates = useQuery(api.crates.list);
   const [q, setQ] = useState("");
   const [hop, setHop] = useState("all");
+  const t = useT();
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -25,13 +27,13 @@ export default function CargoPage() {
 
   return (
     <>
-      <PageHeader title="Cargo" subtitle="Chain of custody from the Goa warehouse to the station.">
+      <PageHeader title={t("Cargo")} subtitle={t("Chain of custody from the Goa warehouse to the station.")}>
         <div className="flex gap-2">
           <Link href="/cargo/scan" className="inline-flex h-9 items-center gap-2 rounded-lg border border-navy-700 px-4 text-sm hover:bg-navy-800">
-            <ScanLine size={16} /> Scan
+            <ScanLine size={16} /> {t("Scan")}
           </Link>
           <Link href="/cargo/new" className="inline-flex h-9 items-center gap-2 rounded-lg bg-ice-500 px-4 text-sm font-medium text-navy-950 hover:bg-ice-400">
-            <Plus size={16} /> New crate
+            <Plus size={16} /> {t("New crate")}
           </Link>
         </div>
       </PageHeader>
@@ -39,12 +41,12 @@ export default function CargoPage() {
       <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_200px]">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-          <Input aria-label="Search crates" placeholder="Search by item or label, e.g. HMS-1004" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+          <Input aria-label={t("Search crates")} placeholder={t("Search by item or label, e.g. HMS-1004")} value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
         </div>
-        <Select aria-label="Filter by hop" value={hop} onChange={(e) => setHop(e.target.value)}>
-          <option value="all">All locations</option>
+        <Select aria-label={t("Filter by hop")} value={hop} onChange={(e) => setHop(e.target.value)}>
+          <option value="all">{t("All locations")}</option>
           {Object.entries(HOP_LABEL).map(([k, l]) => (
-            <option key={k} value={k}>{l}</option>
+            <option key={k} value={k}>{t(l)}</option>
           ))}
         </Select>
       </div>
@@ -53,7 +55,7 @@ export default function CargoPage() {
         <div className="grid gap-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-navy-900" />)}</div>
       ) : rows.length === 0 ? (
         <p className="rounded-xl border border-dashed border-navy-700 p-8 text-center text-sm text-slate-400">
-          No crates match. Clear the search or create one with New crate.
+          {t("No crates match. Clear the search or create one with New crate.")}
         </p>
       ) : (
         <div className="grid gap-2">
@@ -66,9 +68,9 @@ export default function CargoPage() {
               <span className="font-mono text-xs text-ice-300">{c.qrId}</span>
               <span className="flex flex-wrap items-center gap-2 text-sm">
                 {c.item}
-                {c.priority === 1 && <Badge tone="red">Urgent</Badge>}
-                {c.hazmat && <Badge tone="amber"><Flame size={11} /> Hazmat</Badge>}
-                {c.coldChain && <Badge tone="ice"><Snowflake size={11} /> Cold chain</Badge>}
+                {c.priority === 1 && <Badge tone="red">{t("Urgent")}</Badge>}
+                {c.hazmat && <Badge tone="amber"><Flame size={11} /> {t("Hazmat")}</Badge>}
+                {c.coldChain && <Badge tone="ice"><Snowflake size={11} /> {t("Cold chain")}</Badge>}
               </span>
               <span className="font-mono text-xs text-slate-400">{c.weightKg} kg → {c.destination}</span>
               <HopProgress status={c.status} />
@@ -76,7 +78,7 @@ export default function CargoPage() {
           ))}
         </div>
       )}
-      <p className="mt-4 text-xs text-slate-500">Seeded crates are simulated for the demo.</p>
+      <p className="mt-4 text-xs text-slate-500">{t("Seeded crates are simulated for the demo.")}</p>
     </>
   );
 }

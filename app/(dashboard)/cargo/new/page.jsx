@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { useMe } from "@/components/use-me";
+import { useT } from "@/components/language-context";
 
 export default function NewCratePage() {
   const create = useMutation(api.crates.create);
@@ -18,14 +19,15 @@ export default function NewCratePage() {
   const [label, setLabel] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const t = useT();
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
 
   async function submit(e) {
     e.preventDefault();
     setError(null);
     const weight = Number(form.weightKg);
-    if (!form.item.trim()) return setError("Give the crate a name.");
-    if (!(weight > 0)) return setError("Weight must be above 0 kg.");
+    if (!form.item.trim()) return setError(t("Give the crate a name."));
+    if (!(weight > 0)) return setError(t("Weight must be above 0 kg."));
     setBusy(true);
     try {
       const { id, qrId } = await create({
@@ -48,37 +50,37 @@ export default function NewCratePage() {
 
   return (
     <>
-      <PageHeader title="New crate" subtitle="Tag it at the Goa warehouse. Every later scan builds its custody trail." />
+      <PageHeader title={t("New crate")} subtitle={t("Tag it at the Goa warehouse. Every later scan builds its custody trail.")} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <form onSubmit={submit} className="grid gap-4">
-            <Field label="Item">
+            <Field label={t("Item")}>
               <Input value={form.item} onChange={set("item")} />
             </Field>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Weight (kg)">
+              <Field label={t("Weight (kg)")}>
                 <Input type="number" min="0" step="0.1" value={form.weightKg} onChange={set("weightKg")} />
               </Field>
-              <Field label="Destination">
+              <Field label={t("Destination")}>
                 <Select value={form.destination} onChange={set("destination")}>
-                  <option value="MAITRI">Maitri</option>
-                  <option value="BHARATI">Bharati</option>
+                  <option value="MAITRI">{t("Maitri")}</option>
+                  <option value="BHARATI">{t("Bharati")}</option>
                 </Select>
               </Field>
             </div>
-            <Field label="Priority" hint="Urgent crates are loaded last so they come off first.">
+            <Field label={t("Priority")} hint={t("Urgent crates are loaded last so they come off first.")}>
               <Select value={form.priority} onChange={set("priority")}>
-                <option value="1">1, urgent</option>
-                <option value="2">2, standard</option>
-                <option value="3">3, routine</option>
+                <option value="1">{t("1, urgent")}</option>
+                <option value="2">{t("2, standard")}</option>
+                <option value="3">{t("3, routine")}</option>
               </Select>
             </Field>
             <div className="flex gap-6 text-sm">
-              <label className="flex items-center gap-2"><input type="checkbox" checked={form.hazmat} onChange={set("hazmat")} className="accent-ice-500" /> Hazmat</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={form.coldChain} onChange={set("coldChain")} className="accent-ice-500" /> Cold chain</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={form.hazmat} onChange={set("hazmat")} className="accent-ice-500" /> {t("Hazmat")}</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={form.coldChain} onChange={set("coldChain")} className="accent-ice-500" /> {t("Cold chain")}</label>
             </div>
             {error && <p className="text-sm text-red-300">{error}</p>}
-            <Button type="submit" disabled={busy}>{busy ? "Creating…" : "Create and print label"}</Button>
+            <Button type="submit" disabled={busy}>{t(busy ? "Creating…" : "Create and print label")}</Button>
           </form>
         </Card>
 
@@ -102,13 +104,13 @@ export default function NewCratePage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => window.print()}><Printer size={14} /> Print</Button>
-              <Link href={`/cargo/${label.id}`} className="inline-flex h-9 items-center rounded-lg px-4 text-sm text-ice-300 hover:bg-navy-800">Open timeline</Link>
+              <Button variant="outline" onClick={() => window.print()}><Printer size={14} /> {t("Print")}</Button>
+              <Link href={`/cargo/${label.id}`} className="inline-flex h-9 items-center rounded-lg px-4 text-sm text-ice-300 hover:bg-navy-800">{t("Open timeline")}</Link>
             </div>
           </div>
         ) : (
           <div className="grid place-items-center rounded-xl border border-dashed border-navy-700 p-8 text-center text-sm text-slate-400">
-            The QR label appears here after you create the crate.
+            {t("The QR label appears here after you create the crate.")}
           </div>
         )}
       </div>

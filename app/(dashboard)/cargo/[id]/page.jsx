@@ -9,26 +9,28 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { HOPS, HOP_LABEL } from "@/components/hop-progress";
 import { fmtTime } from "@/lib/time";
+import { useT } from "@/components/language-context";
 import { cn } from "@/lib/utils";
 
 export default function CratePage({ params }) {
   const { id } = use(params);
   const data = useQuery(api.crates.get, { id });
+  const t = useT();
 
   if (data === undefined) return <div className="h-64 animate-pulse rounded-xl bg-navy-900" />;
-  if (data === null) return <p className="text-slate-400">Crate not found.</p>;
+  if (data === null) return <p className="text-slate-400">{t("Crate not found.")}</p>;
   const { crate, events } = data;
 
   return (
     <>
       <Link href="/cargo" className="mb-3 inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200">
-        <ArrowLeft size={14} /> Cargo
+        <ArrowLeft size={14} /> {t("Cargo")}
       </Link>
-      <PageHeader title={crate.item} subtitle={`${crate.qrId} · ${crate.weightKg} kg · bound for ${crate.destination}`}>
+      <PageHeader title={crate.item} subtitle={`${crate.qrId} · ${crate.weightKg} kg · ${t("bound for {place}", { place: crate.destination })}`}>
         <div className="flex gap-2">
-          {crate.hazmat && <Badge tone="amber">Hazmat</Badge>}
-          {crate.coldChain && <Badge tone="ice">Cold chain</Badge>}
-          {crate.priority === 1 && <Badge tone="red">Urgent</Badge>}
+          {crate.hazmat && <Badge tone="amber">{t("Hazmat")}</Badge>}
+          {crate.coldChain && <Badge tone="ice">{t("Cold chain")}</Badge>}
+          {crate.priority === 1 && <Badge tone="red">{t("Urgent")}</Badge>}
         </div>
       </PageHeader>
       <Card>
@@ -46,14 +48,14 @@ export default function CratePage({ params }) {
                 >
                   {ev && <Check size={14} />}
                 </span>
-                <div className={cn("text-sm font-medium", !ev && "text-slate-500")}>{HOP_LABEL[hop]}</div>
+                <div className={cn("text-sm font-medium", !ev && "text-slate-500")}>{t(HOP_LABEL[hop])}</div>
                 {ev ? (
                   <div className="text-xs text-slate-400">
-                    {fmtTime(ev.ts, ev.stationCode)} · scanned by {ev.scannedBy}
+                    {fmtTime(ev.ts, ev.stationCode)} · {t("scanned by {name}", { name: ev.scannedBy })}
                     {ev.note && <span className="block text-slate-300">{ev.note}</span>}
                   </div>
                 ) : (
-                  <div className="text-xs text-slate-500">Not yet scanned</div>
+                  <div className="text-xs text-slate-500">{t("Not yet scanned")}</div>
                 )}
               </li>
             );
