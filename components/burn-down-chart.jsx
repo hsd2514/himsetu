@@ -44,7 +44,7 @@ export function BurnDownChart({ stationCode, item }) {
     return [...map.values()].sort((a, b) => a.date - b.date);
   }, [data]);
 
-  if (data === undefined) return <div className="h-72 animate-pulse rounded-lg bg-navy-800" />;
+  if (data === undefined) return <div className="h-72 animate-pulse rounded-2xl bg-white/[0.03]" />;
   if (data === null) return <p className="text-sm text-slate-400">{t("No stock record for this item.")}</p>;
 
   const out = data.timesfm?.stockOutDate ?? data.holtwinters.stockOutDate;

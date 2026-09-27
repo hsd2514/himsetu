@@ -109,7 +109,7 @@ export default function FieldPage() {
           <LifeBuoy size={20} /> {t("Need help")}
         </button>
       </div>
-      {flash && <p className="rounded-lg bg-navy-800 px-3 py-2 text-sm text-slate-200">{flash}</p>}
+      {flash && <p className="rounded-lg bg-white/[0.04] px-3 py-2 text-sm text-slate-200">{flash}</p>}
 
       <PassCountdowns only="MAITRI" compact />
 

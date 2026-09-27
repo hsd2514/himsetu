@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 const IceMap = dynamic(() => import("@/components/ice-map-inner"), {
   ssr: false,
-  loading: () => <div className="h-[420px] animate-pulse rounded-xl bg-navy-900" />,
+  loading: () => <div className="h-[420px] animate-pulse rounded-2xl bg-white/[0.03]" />,
 });
 
 function HeliSlots({ stationCode }) {
@@ -54,7 +54,7 @@ function HeliSlots({ stationCode }) {
         </Button>
       </div>
       {error && <p className="text-sm text-red-300">{error}</p>}
-      {!data && !error && <div className="h-40 animate-pulse rounded-lg bg-navy-800" />}
+      {!data && !error && <div className="h-40 animate-pulse rounded-2xl bg-white/[0.03]" />}
       {data && (
         <>
           {next ? (
@@ -68,7 +68,7 @@ function HeliSlots({ stationCode }) {
               </div>
             </div>
           ) : (
-            <p className="rounded-lg bg-navy-800 p-3 text-sm text-slate-300">{t("No fly-safe window in the next 72 hours. Hold sorties.")}</p>
+            <p className="rounded-lg bg-white/[0.04] p-3 text-sm text-slate-300">{t("No fly-safe window in the next 72 hours. Hold sorties.")}</p>
           )}
           <div>
             <div className="mb-1 flex justify-between text-[11px] text-slate-400">
@@ -90,7 +90,7 @@ function HeliSlots({ stationCode }) {
           </div>
           <ol className="grid gap-1 text-sm">
             {data.slots.filter((s) => s.to > Date.now()).slice(0, 5).map((s) => (
-              <li key={s.from} className="flex justify-between rounded-md bg-navy-800 px-3 py-1.5">
+              <li key={s.from} className="flex justify-between rounded-md bg-white/[0.04] px-3 py-1.5">
                 <span className="font-mono text-xs">{fmtTime(s.from, stationCode)}</span>
                 <span className="text-xs text-slate-400">{t("{h} h", { h: Math.round((s.to - s.from) / 3600000) })}</span>
               </li>
@@ -124,7 +124,7 @@ export default function IcePage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div className="grid content-start gap-4">
-          <Card className="p-3">{station ? <IceMap station={station} berths={berths} bestId={best.id} /> : <div className="h-[420px] animate-pulse rounded-xl bg-navy-900" />}</Card>
+          <Card className="p-3">{station ? <IceMap station={station} berths={berths} bestId={best.id} /> : <div className="h-[420px] animate-pulse rounded-2xl bg-white/[0.03]" />}</Card>
           <p className="text-xs text-slate-500">
             {t("Overlay: AMSR2 sea-ice concentration via NASA GIBS, {date} (latest published). Berth ice figures are simulated stand-ins for processed ISRO EOS-04 / Sentinel-1 SAR.", { date: ICE_DATE })}
           </p>
@@ -132,7 +132,7 @@ export default function IcePage() {
             <CardTitle className="flex items-center gap-2"><Anchor size={14} /> {t("Candidate berths")}</CardTitle>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {berths.map((b, i) => (
-                <div key={b.id} className={cn("rounded-lg border p-3", i === 0 ? "border-emerald-500/50 bg-emerald-500/10" : "border-navy-700 bg-navy-800")}>
+                <div key={b.id} className={cn("rounded-lg border p-3", i === 0 ? "border-emerald-500/50 bg-emerald-500/10" : "border-white/10 bg-white/[0.04]")}>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">{b.name}</span>
                     {i === 0 && <Badge tone="green">{t("Suggested")}</Badge>}

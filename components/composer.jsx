@@ -61,7 +61,7 @@ export function Composer({ onSend, disabled }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={t("Write a short message. Satellite packets are small.")}
-        className="min-h-20 w-full rounded-lg border border-navy-700 bg-navy-800 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-ice-400 focus:outline-none focus:ring-2 focus:ring-ice-400/30"
+        className="min-h-20 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-ice-400 focus:outline-none focus:ring-2 focus:ring-ice-400/30"
       />
       <div className="flex items-center gap-3 text-xs">
         <span className="flex items-center gap-1 text-emerald-300"><Lock size={12} /> {t("End-to-end encrypted")}</span>

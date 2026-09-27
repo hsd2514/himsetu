@@ -38,7 +38,7 @@ export function SosPanel() {
         <p className="mt-1 text-xs text-slate-400">
           {sos.fromName} · {t("received {time}", { time: fmtTime(sos.deliveredAt ?? sos.queuedAt, "GOA") })}
         </p>
-        <div className="mt-3 rounded-lg bg-navy-900 p-3 text-sm">
+        <div className="mt-3 rounded-lg bg-white/[0.03] p-3 text-sm">
           {text ?? (
             <span className="text-slate-400">
               {t("Encrypted. Only {name} on the right device can read this.", { name: me?.name ?? t("the addressee") })}
@@ -54,7 +54,7 @@ export function SosPanel() {
         <h4 className="mt-4 text-sm font-medium text-slate-200">{t("Nearest responders")}</h4>
         <ol className="mt-2 grid gap-2">
           {(nearest ?? []).map((r) => (
-            <li key={r._id} className="flex items-center justify-between rounded-lg bg-navy-900 px-3 py-2 text-sm">
+            <li key={r._id} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2 text-sm">
               <span>{r.name}</span>
               <span className="font-mono text-xs text-slate-300">
                 {t("{km} km · ETA {min} min", { km: r.km.toFixed(1), min: r.etaMin })} {r.kind === "vehicle" ? "(20 km/h)" : "(8 km/h)"}

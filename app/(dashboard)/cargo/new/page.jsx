@@ -109,7 +109,7 @@ export default function NewCratePage() {
             </div>
           </div>
         ) : (
-          <div className="grid place-items-center rounded-xl border border-dashed border-navy-700 p-8 text-center text-sm text-slate-400">
+          <div className="grid place-items-center rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-slate-400">
             {t("The QR label appears here after you create the crate.")}
           </div>
         )}

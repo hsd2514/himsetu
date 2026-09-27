@@ -148,7 +148,7 @@ export default function ScanPage() {
               <Link href={`/cargo/${crate._id}`} className="text-sm text-ice-300 hover:underline">View custody timeline</Link>
             </Card>
           ) : (
-            <div className="grid place-items-center gap-2 rounded-xl border border-dashed border-navy-700 p-8 text-center text-sm text-slate-400">
+            <div className="grid place-items-center gap-2 rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-slate-400">
               <ScanLine size={22} className="text-slate-500" />
               Scanning as {me?.name ?? node.label}. The timeline updates live on every screen.
             </div>

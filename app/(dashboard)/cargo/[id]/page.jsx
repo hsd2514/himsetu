@@ -17,7 +17,7 @@ export default function CratePage({ params }) {
   const data = useQuery(api.crates.get, { id });
   const t = useT();
 
-  if (data === undefined) return <div className="h-64 animate-pulse rounded-xl bg-navy-900" />;
+  if (data === undefined) return <div className="h-64 animate-pulse rounded-2xl bg-white/[0.03]" />;
   if (data === null) return <p className="text-slate-400">{t("Crate not found.")}</p>;
   const { crate, events } = data;
 

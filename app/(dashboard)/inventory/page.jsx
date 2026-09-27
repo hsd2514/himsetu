@@ -23,7 +23,7 @@ function StockCard({ row, stockOut, selected, onSelect }) {
   const pct = Math.min(100, (row.qty / (row.safetyLevel * 5)) * 100);
   const safetyPct = Math.min(100, 20);
   return (
-    <button type="button" onClick={onSelect} className={cn("rounded-xl border bg-navy-900 p-4 text-left transition hover:border-navy-700", selected ? "border-ice-500" : "border-navy-800")}>
+    <button type="button" onClick={onSelect} className={cn("rounded-xl border bg-white/[0.02] p-4 text-left transition hover:border-white/20", selected ? "border-ice-500" : "border-white/[0.08]")}>
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2 text-sm text-slate-300"><Icon size={16} className="text-ice-300" /> {t(NAME[row.item])}</span>
         <Badge tone={tone}>{days === null ? t("No burn") : t("{n} d to safety", { n: Math.max(0, Math.floor(days)) })}</Badge>
@@ -61,7 +61,7 @@ export default function InventoryPage() {
         <BurnDownChart stationCode={sel.stationCode} item={sel.item} />
       </Card>
       {rows === undefined ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[...Array(8)].map((_, i) => <div key={i} className="h-36 animate-pulse rounded-xl bg-navy-900" />)}</div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[...Array(8)].map((_, i) => <div key={i} className="h-36 animate-pulse rounded-2xl bg-white/[0.03]" />)}</div>
       ) : (
         ["MAITRI", "BHARATI"].map((code) => (
           <section key={code} className="mb-8">

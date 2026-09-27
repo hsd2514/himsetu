@@ -36,7 +36,7 @@ export function MessageRow({ m, me, now }) {
 
   const S = STATUS[m.status];
   return (
-    <li className={cn("max-w-[85%] rounded-xl px-3 py-2 text-sm", m.outgoing ? "ml-auto bg-ice-500/15" : "bg-navy-800")}>
+    <li className={cn("max-w-[85%] rounded-xl px-3 py-2 text-sm", m.outgoing ? "ml-auto bg-ice-500/15" : "bg-white/[0.04]")}>
       <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
         <span>{m.outgoing ? t("You to {target}", { target: recipientLabel(m, t) }) : m.fromName}</span>
         {m.priority !== "normal" && <Badge tone={PRIORITY_TONE[m.priority]}>{t(m.priority.toUpperCase())}</Badge>}

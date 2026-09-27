@@ -29,10 +29,10 @@ export default function CargoPage() {
     <>
       <PageHeader title={t("Cargo")} subtitle={t("Chain of custody from the Goa warehouse to the station.")}>
         <div className="flex gap-2">
-          <Link href="/cargo/scan" className="inline-flex h-9 items-center gap-2 rounded-lg border border-navy-700 px-4 text-sm hover:bg-navy-800">
+          <Link href="/cargo/scan" className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-sm text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.98]">
             <ScanLine size={16} /> {t("Scan")}
           </Link>
-          <Link href="/cargo/new" className="inline-flex h-9 items-center gap-2 rounded-lg bg-ice-500 px-4 text-sm font-medium text-navy-950 hover:bg-ice-400">
+          <Link href="/cargo/new" className="inline-flex h-9 items-center gap-2 rounded-lg bg-ice-500 px-4 text-sm font-medium text-navy-950 shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] transition-colors hover:bg-ice-400 active:scale-[0.98]">
             <Plus size={16} /> {t("New crate")}
           </Link>
         </div>
@@ -52,18 +52,24 @@ export default function CargoPage() {
       </div>
 
       {crates === undefined ? (
-        <div className="grid gap-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-navy-900" />)}</div>
+        <div className="surface grid divide-y divide-white/[0.06] rounded-2xl">{[0, 1, 2, 3, 4].map((i) => <div key={i} className="h-14 animate-pulse bg-white/[0.02]" />)}</div>
       ) : rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-navy-700 p-8 text-center text-sm text-slate-400">
+        <p className="rounded-2xl border border-dashed border-white/10 p-10 text-center text-sm text-slate-400">
           {t("No crates match. Clear the search or create one with New crate.")}
         </p>
       ) : (
-        <div className="grid gap-2">
+        <div className="rise surface divide-y divide-white/[0.06] overflow-hidden rounded-2xl" style={{ "--i": 1 }}>
+          <div className="hidden grid-cols-[110px_1fr_140px_240px] gap-4 px-5 py-2.5 text-[11px] text-slate-500 sm:grid">
+            <span>{t("Label")}</span>
+            <span>{t("Item")}</span>
+            <span>{t("Weight, destination")}</span>
+            <span>{t("Custody")}</span>
+          </div>
           {rows.map((c) => (
             <Link
               key={c._id}
               href={`/cargo/${c._id}`}
-              className="grid items-center gap-3 rounded-xl border border-navy-800 bg-navy-900 px-4 py-3 hover:border-navy-700 sm:grid-cols-[110px_1fr_auto_260px]"
+              className="grid items-center gap-2 px-5 py-3.5 transition-colors hover:bg-white/[0.03] sm:grid-cols-[110px_1fr_140px_240px] sm:gap-4"
             >
               <span className="font-mono text-xs text-ice-300">{c.qrId}</span>
               <span className="flex flex-wrap items-center gap-2 text-sm">

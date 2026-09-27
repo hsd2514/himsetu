@@ -56,7 +56,7 @@ export default function MessagesPage() {
           </div>
           <Composer disabled={!keyReady} onSend={(text) => send({ toType, toId, priority, text })} />
           {messages === undefined ? (
-            <div className="h-40 animate-pulse rounded-lg bg-navy-800" />
+            <div className="h-40 animate-pulse rounded-2xl bg-white/[0.03]" />
           ) : messages.length === 0 ? (
             <p className="py-8 text-center text-sm text-slate-400">{t("No messages yet for {name}.", { name: me?.name ?? "" })}</p>
           ) : (
