@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useMutation, useQuery } from "convex/react";
-import { ArrowUpRight, Gauge, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ArrowUpRight, Gauge, RefreshCw, RotateCcw } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { PassCountdowns } from "@/components/pass-countdown";
 import { SosPanel } from "@/components/sos-panel";
 import { LinkQueue } from "@/components/link-queue";
 import { NextWindows } from "@/components/next-windows";
+import { TeamsPanel } from "@/components/teams-panel";
 import { useStation } from "@/components/station-context";
 import { useT } from "@/components/language-context";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,18 @@ export default function MissionPage() {
   const seed = useMutation(api.stations.seed);
   const reset = useMutation(api.seed.reset);
   const setSpeed = useMutation(api.link.setDemoSpeed);
+  const refreshPasses = useAction(api.orbits.refreshNow);
+  const [refreshing, setRefreshing] = useState(false);
+  const tleAgeH = passes?.tleFetchedAt ? Math.round((Date.now() - passes.tleFetchedAt) / 3600000) : null;
+
+  async function refresh() {
+    setRefreshing(true);
+    try {
+      await refreshPasses();
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   const risks = outs?.filter((o) => o.stockOutDate && o.stockOutDate - Date.now() < 60 * 86400000).length;
   const speed = passes?.settings.demoSpeed ?? 60;
@@ -79,15 +93,25 @@ export default function MissionPage() {
 
       <section style={{ "--i": 2 }} className="rise mt-6">
         <PassCountdowns />
-        <p className="mt-2 px-1 text-xs text-slate-500">
-          {t("SGP4 on Iridium NEXT TLEs ({source}).", { source: t(passes?.tleSource === "celestrak" ? "live from CelesTrak" : "bundled snapshot") })}
-          {speed === 60 && ` ${t("Demo mode: one real second is one mission minute.")}`}
-        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-xs text-slate-500">
+          <span>
+            {t("SGP4 on Iridium NEXT TLEs ({source}).", { source: t(passes?.tleSource === "celestrak" ? "live from CelesTrak" : "bundled snapshot") })}
+            {tleAgeH !== null && ` ${t("Fetched {h} h ago.", { h: tleAgeH })}`}
+            {speed === 60 && ` ${t("Demo mode: one real second is one mission minute.")}`}
+          </span>
+          <button onClick={refresh} disabled={refreshing} className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-ice-300 hover:bg-white/[0.05] disabled:opacity-50">
+            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} /> {t(refreshing ? "Recomputing passes…" : "Refresh passes")}
+          </button>
+        </div>
       </section>
 
       <SosPanel />
 
-      <section style={{ "--i": 3 }} className="rise mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <section style={{ "--i": 3 }} className="rise mt-6">
+        <TeamsPanel />
+      </section>
+
+      <section style={{ "--i": 4 }} className="rise mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <Card className="relative overflow-hidden p-0">
           <MissionMap stations={stations ?? []} height={420} />
           <div className="pointer-events-none absolute bottom-3 left-3 z-[400] flex gap-3 rounded-lg bg-navy-950/85 px-3 py-2 text-[11px] text-slate-300 backdrop-blur">

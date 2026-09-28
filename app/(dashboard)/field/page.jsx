@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { pushOutbox, readOutbox, writeOutbox } from "@/lib/outbox";
 import { useMutation, useQuery } from "convex/react";
 import { CircleCheck, Clock3, LifeBuoy, MapPin, WifiOff } from "lucide-react";
 import { api } from "@/convex/_generated/api";
@@ -41,6 +42,8 @@ export default function FieldPage() {
   const now = useNow(1000);
   const [online, setOnline] = useState(true);
   const [flash, setFlash] = useState(null);
+  const [pending, setPending] = useState(0);
+  const flushing = useRef(false);
   const t = useT();
 
   useEffect(() => {
@@ -58,6 +61,35 @@ export default function FieldPage() {
     if (node.code !== "FIELD") setNodeCode("FIELD");
   }, [node.code, setNodeCode]);
 
+  /** Check in and send one action over the link. Returns an error string or null. */
+  const deliver = useCallback(
+    async (item) => {
+      await checkIn({ personId: me._id, lat: item.lat, lon: item.lon });
+      return send({ toType: "station", toId: "GOA", priority: item.priority, text: item.text, lat: item.lat, lon: item.lon });
+    },
+    [me, checkIn, send]
+  );
+
+  /** Send everything saved while offline, oldest first; stop at the first failure. */
+  const flush = useCallback(async () => {
+    if (flushing.current || !me || !navigator.onLine) return;
+    flushing.current = true;
+    let items = readOutbox();
+    while (items.length) {
+      const err = await deliver(items[0]).catch((e) => e.message);
+      if (err) break;
+      items = items.slice(1);
+      writeOutbox(items);
+    }
+    setPending(items.length);
+    flushing.current = false;
+  }, [me, deliver]);
+
+  useEffect(() => {
+    setPending(readOutbox().length);
+    if (online && keyReady) flush();
+  }, [online, keyReady, flush]);
+
   async function preset(kind) {
     if (!me || !gps) return;
     const coords = `${gps.lat.toFixed(4)},${gps.lon.toFixed(4)}`;
@@ -68,8 +100,15 @@ export default function FieldPage() {
       delayed: { priority: "ops", text: `Delayed, all safe. ${me.name} at ${coords}.` },
       safe: { priority: "normal", text: `Safe. ${me.name} at ${coords}.` },
     }[kind];
-    await checkIn({ personId: me._id, lat: gps.lat, lon: gps.lon });
-    const err = await send({ toType: "station", toId: "GOA", ...map, lat: gps.lat, lon: gps.lon });
+    const item = { ...map, lat: gps.lat, lon: gps.lon, ts: Date.now() };
+    if (!navigator.onLine) {
+      // Stamp the real time so Goa knows when it happened, not when it arrived.
+      const hhmm = new Date(item.ts).toISOString().slice(11, 16);
+      setPending(pushOutbox({ ...item, text: `${item.text} Logged ${hhmm} UTC.` }).length);
+      setFlash(t("No network. Saved on this phone; it sends as soon as the link is back."));
+      return;
+    }
+    const err = await deliver(item);
     setFlash(err ?? t(kind === "sos" ? "SOS queued at the front of the link. It goes on the next pass." : "Check-in queued for the next pass."));
   }
 
@@ -80,6 +119,11 @@ export default function FieldPage() {
       {!online && (
         <div className="flex items-center gap-2 rounded-lg bg-amber-700 px-3 py-2 text-sm text-[#fff]">
           <WifiOff size={16} /> {t("Offline. Actions are kept on this phone and sent when a link opens.")}
+        </div>
+      )}
+      {pending > 0 && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+          {t("{n} action(s) saved on this phone, waiting for network.", { n: pending })}
         </div>
       )}
       <div>

@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useQuery } from "convex/react";
-import { Lock, Siren } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import { CheckCheck, Lock, Siren } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useSend } from "@/components/composer";
 import { api } from "@/convex/_generated/api";
 import { MissionMap } from "@/components/mission-map";
 import { useMe } from "@/components/use-me";
@@ -19,6 +21,10 @@ export function SosPanel() {
   );
   const { me } = useMe();
   const [text, setText] = useState(null);
+  const [ackBusy, setAckBusy] = useState(false);
+  const [ackErr, setAckErr] = useState(null);
+  const send = useSend(me);
+  const acknowledge = useMutation(api.sos.acknowledge);
   const t = useT();
 
   useEffect(() => {
@@ -28,6 +34,22 @@ export function SosPanel() {
 
   if (!sos) return null;
   const best = nearest?.[0];
+
+  // Reply to the sender over the link (encrypted, queued for their next pass), then close the alert.
+  async function ack() {
+    setAckBusy(true);
+    setAckErr(null);
+    const eta = best ? t("{team} is closest, ETA {min} min.", { team: best.name, min: best.etaMin }) : "";
+    const err = await send({
+      toType: "user",
+      toId: sos.fromId,
+      priority: "ops",
+      text: `${t("Goa received your SOS. Help is being sent.")} ${eta}`.trim(),
+    });
+    if (err) setAckErr(err);
+    else await acknowledge({ messageId: sos._id, byId: me._id });
+    setAckBusy(false);
+  }
 
   return (
     <section className="mt-6 grid gap-4 surface rounded-2xl border-l-4 border-l-red-500 p-4 md:p-5 lg:grid-cols-[1fr_1.2fr]">
@@ -62,6 +84,18 @@ export function SosPanel() {
             </li>
           ))}
         </ol>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          {sos.ackAt ? (
+            <span className="inline-flex items-center gap-1.5 text-sm text-emerald-300">
+              <CheckCheck size={16} /> {t("Acknowledged {time}", { time: fmtTime(sos.ackAt, "GOA") })}
+            </span>
+          ) : (
+            <Button onClick={ack} disabled={ackBusy || !me}>
+              <CheckCheck size={16} /> {ackBusy ? t("Sending…") : t("Acknowledge and reply")}
+            </Button>
+          )}
+          {ackErr && <span className="text-xs text-red-300">{ackErr}</span>}
+        </div>
       </div>
       <MissionMap
         teams={teams}

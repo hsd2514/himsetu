@@ -11,9 +11,18 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 const devanagari = Noto_Sans_Devanagari({ variable: "--font-devanagari", subsets: ["devanagari"], weight: ["400", "500", "600", "700"] });
 
 export const metadata = {
-  title: "HIMSETU",
+  title: { default: "Mission · HIMSETU", template: "%s · HIMSETU" },
   description: "Edge-first logistics that plans around satellites and ice.",
   manifest: "/manifest.json",
+  icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "HIMSETU", statusBarStyle: "black-translucent" },
+};
+
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0f1216" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f6f8" },
+  ],
 };
 
 export default function RootLayout({ children }) {

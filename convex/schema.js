@@ -131,6 +131,8 @@ export default defineSchema({
     sentAt: v.optional(v.number()),
     deliveredAt: v.optional(v.number()),
     attempts: v.number(),
+    ackAt: v.optional(v.number()), // SOS acknowledged at Goa
+    ackBy: v.optional(v.id("people")),
   })
     .index("by_gate_status", ["gateStation", "status"])
     .index("by_status", ["status"]),

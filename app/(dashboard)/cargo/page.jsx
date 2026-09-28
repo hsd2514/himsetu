@@ -2,18 +2,28 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
-import { Plus, ScanLine, Search, Flame, Snowflake } from "lucide-react";
+import { Plus, ScanLine, Search, Flame, Snowflake, Siren } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/field";
 import { HOP_LABEL, HopProgress } from "@/components/hop-progress";
 import { useT } from "@/components/language-context";
+import { cn } from "@/lib/utils";
+
+// Chip id, label, icon, and the crate test it applies.
+const CHIPS = [
+  { id: "urgent", label: "Urgent", icon: Siren, test: (c) => c.priority === 1 },
+  { id: "hazmat", label: "Hazmat", icon: Flame, test: (c) => c.hazmat },
+  { id: "cold", label: "Cold chain", icon: Snowflake, test: (c) => c.coldChain },
+];
 
 export default function CargoPage() {
   const crates = useQuery(api.crates.list);
   const [q, setQ] = useState("");
   const [hop, setHop] = useState("all");
+  const [chips, setChips] = useState([]);
+  const toggle = (id) => setChips((on) => (on.includes(id) ? on.filter((x) => x !== id) : [...on, id]));
   const t = useT();
 
   const rows = useMemo(() => {
@@ -21,9 +31,10 @@ export default function CargoPage() {
     return (crates ?? []).filter(
       (c) =>
         (hop === "all" || c.status === hop) &&
+        CHIPS.every((chip) => !chips.includes(chip.id) || chip.test(c)) &&
         (!needle || c.item.toLowerCase().includes(needle) || c.qrId.toLowerCase().includes(needle))
     );
-  }, [crates, q, hop]);
+  }, [crates, q, hop, chips]);
 
   return (
     <>
@@ -49,6 +60,31 @@ export default function CargoPage() {
             <option key={k} value={k}>{t(l)}</option>
           ))}
         </Select>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label={t("Filter crates")}>
+        {CHIPS.map(({ id, label, icon: Icon }) => {
+          const on = chips.includes(id);
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={on}
+              onClick={() => toggle(id)}
+              className={cn(
+                "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs transition-colors active:scale-[0.98]",
+                on ? "border-ice-500 bg-ice-500/15 text-ice-300" : "border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"
+              )}
+            >
+              <Icon size={13} /> {t(label)}
+            </button>
+          );
+        })}
+        {crates && (
+          <span className="ml-auto text-xs text-slate-500">
+            {t("{n} of {total} crates", { n: rows.length, total: crates.length })}
+          </span>
+        )}
       </div>
 
       {crates === undefined ? (

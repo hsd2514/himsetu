@@ -18,34 +18,56 @@ export const checkIn = mutation({
   },
 });
 
+/** Raise a missed check-in alert for a team unless one is already open. */
+async function raiseMissed(ctx, t, now, open) {
+  if (open.some((a) => a.type === "missed_checkin" && a.refId === t._id)) return;
+  await ctx.db.insert("alerts", {
+    type: "missed_checkin",
+    severity: "warning",
+    stationCode: t.stationCode,
+    refId: t._id,
+    text: `${t.name} missed its check-in (every ${t.checkInEveryMin} min)`,
+    ts: now,
+    resolved: false,
+  });
+}
+
+const openAlertRows = (ctx) => ctx.db.query("alerts").withIndex("by_resolved", (q) => q.eq("resolved", false)).collect();
+
 /** Cron: raise an alert for every team that has gone quiet past its interval. */
 export const checkMissed = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
-    const open = await ctx.db.query("alerts").withIndex("by_resolved", (q) => q.eq("resolved", false)).collect();
+    const open = await openAlertRows(ctx);
     for (const t of await ctx.db.query("teams").collect()) {
-      if (now - t.lastCheckIn < t.checkInEveryMin * 60000) continue;
-      if (open.some((a) => a.type === "missed_checkin" && a.refId === t._id)) continue;
-      await ctx.db.insert("alerts", {
-        type: "missed_checkin",
-        severity: "warning",
-        stationCode: t.stationCode,
-        refId: t._id,
-        text: `${t.name} missed its check-in (every ${t.checkInEveryMin} min)`,
-        ts: now,
-        resolved: false,
-      });
+      if (now - t.lastCheckIn >= t.checkInEveryMin * 60000) await raiseMissed(ctx, t, now, open);
     }
   },
 });
 
-/** Demo helper: make one team overdue right now. */
+/** Demo helper: make one team overdue and raise its alert immediately. */
 export const simulateMissed = mutation({
   args: { teamId: v.id("teams") },
   handler: async (ctx, { teamId }) => {
     const t = await ctx.db.get(teamId);
-    await ctx.db.patch(teamId, { lastCheckIn: Date.now() - (t.checkInEveryMin + 1) * 60000 });
+    if (!t) throw new Error("Unknown team");
+    const now = Date.now();
+    await ctx.db.patch(teamId, { lastCheckIn: now - (t.checkInEveryMin + 1) * 60000 });
+    await raiseMissed(ctx, t, now, await openAlertRows(ctx));
+  },
+});
+
+/** Goa has seen an SOS: stamp it and close its alert. The reply itself goes through the link. */
+export const acknowledge = mutation({
+  args: { messageId: v.id("messages"), byId: v.id("people") },
+  handler: async (ctx, { messageId, byId }) => {
+    const m = await ctx.db.get(messageId);
+    if (!m || m.priority !== "sos") throw new Error("Not an SOS message");
+    await ctx.db.patch(messageId, { ackAt: Date.now(), ackBy: byId });
+    for (const a of await openAlertRows(ctx)) {
+      if (a.type === "sos" && a.refId === messageId) await ctx.db.patch(a._id, { resolved: true });
+    }
   },
 });
 
