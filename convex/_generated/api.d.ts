@@ -16,6 +16,7 @@ import type * as clock from "../clock.js";
 import type * as crates from "../crates.js";
 import type * as crons from "../crons.js";
 import type * as data_iridiumTle from "../data/iridiumTle.js";
+import type * as demo from "../demo.js";
 import type * as forecast from "../forecast.js";
 import type * as geo from "../geo.js";
 import type * as http from "../http.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   crates: typeof crates;
   crons: typeof crons;
   "data/iridiumTle": typeof data_iridiumTle;
+  demo: typeof demo;
   forecast: typeof forecast;
   geo: typeof geo;
   http: typeof http;
