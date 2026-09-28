@@ -89,9 +89,9 @@ export const refresh = internalAction({
 
 /** Manual trigger from the UI. */
 export const refreshNow = action({
-  args: { actorId: v.id("people") },
-  handler: async (ctx, { actorId }) => {
-    await ctx.runQuery(internal.people.assertCan, { actorId, perm: "demo.control" });
+  args: {},
+  handler: async (ctx) => {
+    await ctx.runQuery(internal.people.assertCan, { perm: "demo.control" });
     return ctx.runAction(internal.orbits.refresh, {});
   },
 });

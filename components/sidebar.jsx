@@ -2,12 +2,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Boxes, MessageSquareLock, Siren, Snowflake, Info, ChevronsUpDown } from "lucide-react";
-import { NODES, useStation } from "@/components/station-context";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { LayoutDashboard, Package, Boxes, MessageSquareLock, Siren, Snowflake, Info, LogOut } from "lucide-react";
+import { useStation } from "@/components/station-context";
 import { LanguageToggle, useT } from "@/components/language-context";
 import { useNow } from "@/components/use-me";
 import { ThemePicker } from "@/components/theme-context";
-import { useMe } from "@/components/use-me";
 import { ROLE_LABEL } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 
@@ -37,9 +37,9 @@ function LocalClock({ tz }) {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { node, setNodeCode } = useStation();
+  const { node, me } = useStation();
+  const { signOut } = useAuthActions();
   const t = useT();
-  const { me } = useMe();
   const active = (href) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
@@ -57,25 +57,26 @@ export function Sidebar() {
         <LanguageToggle />
       </div>
 
-      <label className="surface relative block rounded-xl px-3 py-2.5">
-        <span className="block text-[11px] text-slate-400">{t("Logged in as")}</span>
-        <select
-          value={node.code}
-          onChange={(e) => setNodeCode(e.target.value)}
-          className="w-full cursor-pointer appearance-none bg-transparent pr-6 text-sm font-medium text-slate-100 focus:outline-none [&>option]:bg-navy-900"
-        >
-          {NODES.map((n) => (
-            <option key={n.code} value={n.code}>
-              {t(n.label)}
-            </option>
-          ))}
-        </select>
-        <ChevronsUpDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
-        <span className="mt-0.5 flex items-center justify-between gap-2">
+      <div className="surface rounded-xl px-3 py-2.5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium text-slate-100">{me?.name}</div>
+            <div className="truncate text-[11px] text-slate-400">{t(node.label)}</div>
+          </div>
+          <button
+            onClick={() => signOut()}
+            title={t("Sign out")}
+            aria-label={t("Sign out")}
+            className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+          >
+            <LogOut size={15} />
+          </button>
+        </div>
+        <span className="mt-1 flex items-center justify-between gap-2">
           <LocalClock tz={node.tz} />
-          {me && <span title={me.name} className="truncate rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-slate-300">{t(ROLE_LABEL[me.role])}</span>}
+          {me && <span className="truncate rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-slate-300">{t(ROLE_LABEL[me.role])}</span>}
         </span>
-      </label>
+      </div>
 
       <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0">
         {NAV.map(({ href, label, icon: Icon }) => (

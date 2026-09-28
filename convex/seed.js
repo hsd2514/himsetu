@@ -14,11 +14,11 @@ const STATIONS = [
 ];
 
 const PEOPLE = [
-  { name: "Anjali Naik", role: "planner", stationCode: "GOA", nodeCode: "GOA" },
-  { name: "Capt. Vikram Rao", role: "lead", stationCode: "SHIP", nodeCode: "SHIP" },
-  { name: "Dr. Meera Iyer", role: "lead", stationCode: "MAITRI", nodeCode: "MAITRI" },
-  { name: "Rohit Bhatt", role: "lead", stationCode: "BHARATI", nodeCode: "BHARATI" },
-  { name: "Tenzin Negi", role: "field", stationCode: "MAITRI", nodeCode: "FIELD" },
+  { name: "Anjali Naik", role: "planner", stationCode: "GOA", nodeCode: "GOA", email: "goa@himsetu.demo" },
+  { name: "Capt. Vikram Rao", role: "lead", stationCode: "SHIP", nodeCode: "SHIP", email: "ship@himsetu.demo" },
+  { name: "Dr. Meera Iyer", role: "lead", stationCode: "MAITRI", nodeCode: "MAITRI", email: "maitri@himsetu.demo" },
+  { name: "Rohit Bhatt", role: "lead", stationCode: "BHARATI", nodeCode: "BHARATI", email: "bharati@himsetu.demo" },
+  { name: "Tenzin Negi", role: "field", stationCode: "MAITRI", nodeCode: "FIELD", email: "field@himsetu.demo" },
   { name: "Kavya Menon", role: "field", stationCode: "MAITRI", nodeCode: "" },
   { name: "Arjun Thapa", role: "field", stationCode: "MAITRI", nodeCode: "" },
   { name: "Sanjay Kulkarni", role: "field", stationCode: "BHARATI", nodeCode: "" },
@@ -58,9 +58,9 @@ const DAY = 86400000;
 
 /** From the UI: planners only. From the CLI use `npx convex run seed:resetAll`. */
 export const reset = mutation({
-  args: { actorId: v.id("people") },
-  handler: async (ctx, { actorId }) => {
-    await requirePermission(ctx, actorId, "demo.control");
+  args: {},
+  handler: async (ctx) => {
+    await requirePermission(ctx, "demo.control");
     await ctx.runMutation(internal.seed.resetAll, {});
     return "reset";
   },
@@ -155,6 +155,8 @@ export const seedAll = internalMutation({
       }
     }
     await ctx.scheduler.runAfter(0, internal.orbits.refresh, {});
+    // Create (or re-link) the sign-in accounts for everyone with an email.
+    await ctx.scheduler.runAfter(0, internal.accounts.provision, {});
     return "seeded";
   },
 });

@@ -1,4 +1,5 @@
 import { internalMutation, internalQuery, query } from "./_generated/server";
+import { signedInQuery } from "./authz";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { getSettings, missionNow } from "./clock";
@@ -54,7 +55,7 @@ export const ensureHorizon = internalMutation({
 });
 
 /** Upcoming passes per remote station, in mission time, plus the clock needed to render countdowns. */
-export const upcoming = query({
+export const upcoming = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const settings = await getSettings(ctx);

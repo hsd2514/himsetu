@@ -1,4 +1,5 @@
-import { query, mutation } from "./_generated/server";
+import { query, internalMutation } from "./_generated/server";
+import { signedInQuery } from "./authz";
 import { v } from "convex/values";
 import { holtWinters } from "../lib/holtwinters";
 
@@ -11,7 +12,7 @@ const HORIZON = 120;
  *   holtwinters live forecast of stock level for 120 days
  *   timesfm    imported TimesFM-3 forecast, if one exists
  */
-export const burnDown = query({
+export const burnDown = signedInQuery({
   args: { stationCode: v.string(), item: v.string() },
   handler: async (ctx, { stationCode, item }) => {
     const inv = (await ctx.db.query("inventory").withIndex("by_station", (q) => q.eq("stationCode", stationCode)).collect()).find(
@@ -85,7 +86,8 @@ export const history = query({
 });
 
 /** Import TimesFM-3 output produced offline by notebooks/timesfm_forecast.ipynb. */
-export const importTimesfm = mutation({
+/** Called by `npm run forecast:import` through `npx convex run` (internal: not reachable from browsers). */
+export const importTimesfm = internalMutation({
   args: {
     rows: v.array(
       v.object({
@@ -118,7 +120,7 @@ export const importTimesfm = mutation({
 });
 
 /** Earliest Holt-Winters stock-out per station/item, for KPIs and the inventory cards. */
-export const stockOuts = query({
+export const stockOuts = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const today = Math.floor(Date.now() / DAY) * DAY;

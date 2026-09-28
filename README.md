@@ -36,7 +36,8 @@ Browser (Next.js 15, JS)                     Convex (DB, realtime, scheduler, cr
 - **Pass-gated link.** A message that touches a remote node (ship, Maitri, Bharati, field) waits for that node's next Iridium pass. At AOS the scheduler releases up to 4 messages, most urgent first, 340 bytes each. 5% are randomly dropped and retried on the next pass. Goa to Goa is instant.
 - **Demo speed.** At 60× one real second is one mission minute, so a pass 48 minutes away arrives in 48 seconds. Toggle it on the Mission page.
 - **Encryption.** Each device makes a libsodium keypair; the public key goes to Convex, the private key stays in the browser. Every message gets a fresh key, sealed to each recipient. The server only stores ciphertext.
-- **Roles (RBAC).** Planner (Goa), station lead (ship, Maitri, Bharati) and field team. Permissions live in `lib/rbac.js`; every protected Convex mutation checks them through `convex/authz.js`, and the UI hides what a role cannot do. Identity is the "Logged in as" node: a prototype stand-in for real sign-in.
+- **Sign-in.** Convex Auth with email + password. One account per node: `goa@`, `ship@`, `maitri@`, `bharati@` and `field@himsetu.demo`. Accounts are created by the seed (`convex/accounts.js`); public sign-up is closed. The shared demo password is the `DEMO_PASSWORD` environment variable on the Convex deployment (locally it is also in the gitignored `.env.demo`). Every query needs a signed-in user, except the TimesFM history export.
+- **Roles (RBAC).** Planner (Goa), station lead (ship, Maitri, Bharati) and field team. Permissions live in `lib/rbac.js`; every protected Convex mutation checks the signed-in person's role through `convex/authz.js`, and the UI hides what a role cannot do. Nothing trusts an ID sent by the browser.
 - **Stakeholder messaging.** SOS and field check-ins go to every stakeholder (Goa planner, ship and station leads). Messages are never deleted; each sender sees delivery and "read by n of m".
 - **SAR.** Nearest teams by great-circle distance, ETA at 8 km/h on foot and 20 km/h by snow vehicle.
 
@@ -46,11 +47,11 @@ Needs Node 20+.
 
 ```bash
 npm install
-npx convex dev          # first run creates a local Convex deployment and .env.local
-npm run dev             # http://localhost:3000
+npx convex dev --once                                   # creates the dev deployment and .env.local
+node scripts/set-auth-env.mjs --site=http://localhost:3000  # sign-in keys + DEMO_PASSWORD (saved to .env.demo)
+npx convex run seed:resetAll                            # demo data + the five accounts
+npm run dev                                             # http://localhost:3000, sign in with any demo account
 ```
-
-Open the Mission page and press **Load demo data**, or run `npx convex run seed:resetAll`.
 
 **On a phone** (camera scanning needs HTTPS):
 
@@ -63,14 +64,14 @@ npm run dev:phone       # https://<your-laptop-ip>:3000, accept the self-signed 
 ```bash
 npm run forecast:export   # writes notebooks/history.json from Convex
 # run notebooks/timesfm_forecast.ipynb in Colab, download its output JSON
-npm run forecast:import   # loads it into the forecasts table
+npm run forecast:import -- timesfm_forecast.json   # loads it into the forecasts table (CONVEX_RUN_FLAGS=--prod for production)
 ```
 
 **Regenerate PWA icons:** `node scripts/make-icons.mjs`.
 
 ## Deploy
 
-- Backend: `npx convex deploy` (needs `npx convex login` once).
+- Backend: `npx convex deploy` (needs `npx convex login` once). First time on a new deployment: `node scripts/set-auth-env.mjs --prod --site=https://himsetu.vercel.app`, then `npx convex run --prod seed:resetAll`. The team can read the password with `npx convex env get --prod DEMO_PASSWORD`.
 - Frontend: `npx vercel@latest deploy --prod` (project `himsetu`, env `NEXT_PUBLIC_CONVEX_URL` already set on Vercel).
 - After a schema or function change, run `npx convex deploy` before the frontend deploy.
 

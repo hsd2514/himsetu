@@ -1,7 +1,8 @@
 import { query } from "./_generated/server";
+import { signedInQuery } from "./authz";
 
 /** Stock rows with a simple days-left estimate from the last 14 days of burn. */
-export const list = query({
+export const list = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const rows = await ctx.db.query("inventory").collect();

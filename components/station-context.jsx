@@ -1,7 +1,9 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-/** Nodes a user can "log in" as. FIELD is a Maitri field team on a phone. */
+/** The five places people work from. FIELD is a Maitri field team on a phone. */
 export const NODES = [
   { code: "GOA", label: "NCPOR Goa Hub", tz: "Asia/Kolkata" },
   { code: "SHIP", label: "Ice-class Ship", tz: "UTC" },
@@ -10,27 +12,16 @@ export const NODES = [
   { code: "FIELD", label: "Field Team (Maitri)", tz: "UTC" },
 ];
 
-const StationCtx = createContext({ node: NODES[0], setNodeCode: () => {} });
+const StationCtx = createContext({ node: NODES[0], me: undefined });
 
+/**
+ * Who is signed in, and the node they work from. `me` is undefined while loading
+ * and null when signed out (or the account is not linked to a person yet).
+ */
 export function StationProvider({ children }) {
-  const [code, setCode] = useState("GOA");
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("himsetu.node");
-      if (saved && NODES.some((n) => n.code === saved)) setCode(saved);
-    } catch {}
-  }, []);
-
-  const setNodeCode = (c) => {
-    setCode(c);
-    try {
-      localStorage.setItem("himsetu.node", c);
-    } catch {}
-  };
-
-  const node = NODES.find((n) => n.code === code) ?? NODES[0];
-  return <StationCtx.Provider value={{ node, setNodeCode }}>{children}</StationCtx.Provider>;
+  const me = useQuery(api.people.me);
+  const node = NODES.find((n) => n.code === me?.nodeCode) ?? NODES[0];
+  return <StationCtx.Provider value={{ node, me }}>{children}</StationCtx.Provider>;
 }
 
 export const useStation = () => useContext(StationCtx);

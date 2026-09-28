@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ensureWindow } from "./link";
-import { requirePermission } from "./authz";
+import { requirePermission, requireSelf, signedInQuery } from "./authz";
 
 export const MAX_BYTES = 340;
 
@@ -24,7 +24,7 @@ async function resolveRecipients(ctx, toType, toId, fromId) {
 }
 
 /** Recipients and their public keys, so the browser can seal before sending. */
-export const recipients = query({
+export const recipients = signedInQuery({
   args: { toType: v.string(), toId: v.string(), fromId: v.id("people") },
   handler: async (ctx, { toType, toId, fromId }) => {
     const list = await resolveRecipients(ctx, toType, toId, fromId);
@@ -47,9 +47,8 @@ export const send = mutation({
   },
   handler: async (ctx, args) => {
     if (args.bytes > MAX_BYTES) throw new Error(`Message is ${args.bytes} bytes; the satellite limit is ${MAX_BYTES}.`);
-    const from = await ctx.db.get(args.fromId);
-    if (!from) throw new Error("Unknown sender");
-    if (args.toType === "broadcast") await requirePermission(ctx, args.fromId, "message.broadcast");
+    const from = await requireSelf(ctx, args.fromId);
+    if (args.toType === "broadcast") await requirePermission(ctx, "message.broadcast");
     const recipients = await resolveRecipients(ctx, args.toType, args.toId, args.fromId);
     const now = Date.now();
 
@@ -75,9 +74,10 @@ export const send = mutation({
 });
 
 /** Inbox + outbox for one person, newest first. */
-export const forPerson = query({
+export const forPerson = signedInQuery({
   args: { personId: v.id("people") },
   handler: async (ctx, { personId }) => {
+    await requireSelf(ctx, personId);
     const all = await ctx.db.query("messages").order("desc").take(200);
     const people = await ctx.db.query("people").collect();
     const name = (id) => people.find((p) => p._id === id)?.name ?? "Unknown";
@@ -91,6 +91,7 @@ export const forPerson = query({
 export const markRead = mutation({
   args: { id: v.id("messages"), personId: v.id("people") },
   handler: async (ctx, { id, personId }) => {
+    await requireSelf(ctx, personId);
     const m = await ctx.db.get(id);
     if (!m || !m.recipientIds.includes(personId)) return;
     if (m.status !== "delivered" && m.status !== "read") return;
@@ -102,7 +103,7 @@ export const markRead = mutation({
 });
 
 /** Queue as seen by the link: what is waiting, in release order. */
-export const queue = query({
+export const queue = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const rank = { sos: 0, medical: 1, ops: 2, normal: 3 };

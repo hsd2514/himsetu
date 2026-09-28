@@ -61,7 +61,7 @@ export default function ScanPage() {
     setError(null);
     setBusy(true);
     try {
-      const res = await scan({ qrId: label, hop, actorId: me._id, note: note.trim() || undefined });
+      const res = await scan({ qrId: label, hop, note: note.trim() || undefined });
       setLogged((l) => [res, ...l].slice(0, 6));
       setQrId("");
       setNote("");

@@ -35,7 +35,7 @@ function Kpi({ label, value, tone, href }) {
 
 export default function MissionPage() {
   const { node } = useStation();
-  const { me, can } = useMe();
+  const { can } = useMe();
   const demoControl = can("demo.control");
   const t = useT();
   const stations = useQuery(api.stations.list);
@@ -44,7 +44,6 @@ export default function MissionPage() {
   const queue = useQuery(api.messages.queue);
   const alerts = useQuery(api.sos.openAlerts);
   const passes = useQuery(api.passes.upcoming);
-  const seed = useMutation(api.stations.seed);
   const reset = useMutation(api.seed.reset);
   const setSpeed = useMutation(api.link.setDemoSpeed);
   const refreshPasses = useAction(api.orbits.refreshNow);
@@ -54,7 +53,7 @@ export default function MissionPage() {
   async function refresh() {
     setRefreshing(true);
     try {
-      await refreshPasses({ actorId: me._id });
+      await refreshPasses();
     } finally {
       setRefreshing(false);
     }
@@ -68,7 +67,9 @@ export default function MissionPage() {
       <Card className="rise mx-auto mt-16 max-w-md text-center">
         <h2 className="text-lg font-semibold">{t("No mission data yet")}</h2>
         <p className="mt-2 text-sm text-slate-400">{t("Load the simulated season: stations, crates, field teams and 60 days of stock use.")}</p>
-        <Button className="mt-4" onClick={() => seed()}>{t("Load demo data")}</Button>
+        {demoControl && (
+          <Button className="mt-4" onClick={() => reset()}>{t("Load demo data")}</Button>
+        )}
       </Card>
     );
   }
@@ -77,10 +78,10 @@ export default function MissionPage() {
     <>
       <PageHeader title={t(node.code === "GOA" ? "NCPOR Goa Hub" : node.label)} subtitle={t("Every crate, drum and person on one map, refreshed at each satellite pass.")}>
         {demoControl && <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setSpeed({ demoSpeed: speed === 60 ? 1 : 60, actorId: me._id })}>
+          <Button variant="outline" size="sm" onClick={() => setSpeed({ demoSpeed: speed === 60 ? 1 : 60 })}>
             <Gauge size={14} /> {t(speed === 60 ? "Demo speed 60×" : "Real time")}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => reset({ actorId: me._id })}>
+          <Button variant="ghost" size="sm" onClick={() => reset()}>
             <RotateCcw size={14} /> {t("Reset demo")}
           </Button>
         </div>}

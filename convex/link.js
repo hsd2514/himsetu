@@ -1,7 +1,7 @@
 import { internalMutation, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { requirePermission } from "./authz";
+import { requirePermission, signedInQuery } from "./authz";
 import { getSettings, missionNow, realTimeFor } from "./clock";
 
 /**
@@ -103,9 +103,9 @@ export const rescheduleAll = internalMutation({
 });
 
 export const setDemoSpeed = mutation({
-  args: { demoSpeed: v.union(v.literal(1), v.literal(60)), actorId: v.id("people") },
-  handler: async (ctx, { demoSpeed, actorId }) => {
-    await requirePermission(ctx, actorId, "demo.control");
+  args: { demoSpeed: v.union(v.literal(1), v.literal(60)) },
+  handler: async (ctx, { demoSpeed }) => {
+    await requirePermission(ctx, "demo.control");
     // Restart the mission clock at "now" so passes are recomputed on the new time scale.
     const s = await ctx.db.query("settings").first();
     const row = { demoSpeed, demoStartTs: Date.now() };
@@ -115,7 +115,7 @@ export const setDemoSpeed = mutation({
   },
 });
 
-export const status = query({
+export const status = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const windows = await ctx.db.query("linkWindows").collect();

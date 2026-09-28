@@ -47,7 +47,7 @@ export function SosPanel() {
       text: `${t("Goa received your SOS. Help is being sent.")} ${eta}`.trim(),
     });
     if (err) setAckErr(err);
-    else await acknowledge({ messageId: sos._id, byId: me._id });
+    else await acknowledge({ messageId: sos._id });
     setAckBusy(false);
   }
 

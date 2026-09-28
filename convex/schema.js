@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 const station = v.union(
   v.literal("GOA"),
@@ -11,6 +12,8 @@ const station = v.union(
 const priority = v.union(v.literal("sos"), v.literal("medical"), v.literal("ops"), v.literal("normal"));
 
 export default defineSchema({
+  ...authTables,
+
   stations: defineTable({
     code: v.string(),
     name: v.string(),
@@ -23,13 +26,17 @@ export default defineSchema({
     name: v.string(),
     role: v.union(v.literal("planner"), v.literal("lead"), v.literal("field")),
     stationCode: station,
-    nodeCode: v.string(), // which "log in as" node this person represents
+    nodeCode: v.string(), // which node this person works from (GOA, SHIP, MAITRI, BHARATI, FIELD)
+    email: v.optional(v.string()), // sign-in email for people with an account
+    userId: v.optional(v.id("users")), // linked Convex Auth user
     publicKey: v.optional(v.string()),
     lastLat: v.optional(v.number()),
     lastLon: v.optional(v.number()),
     lastSeen: v.optional(v.number()),
   })
     .index("by_node", ["nodeCode"])
+    .index("by_user", ["userId"])
+    .index("by_email", ["email"])
     .index("by_station", ["stationCode"]),
 
   teams: defineTable({

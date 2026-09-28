@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as accounts from "../accounts.js";
+import type * as accountsDb from "../accountsDb.js";
+import type * as auth from "../auth.js";
 import type * as authz from "../authz.js";
 import type * as clock from "../clock.js";
 import type * as crates from "../crates.js";
@@ -15,6 +18,7 @@ import type * as crons from "../crons.js";
 import type * as data_iridiumTle from "../data/iridiumTle.js";
 import type * as forecast from "../forecast.js";
 import type * as geo from "../geo.js";
+import type * as http from "../http.js";
 import type * as inventory from "../inventory.js";
 import type * as link from "../link.js";
 import type * as messages from "../messages.js";
@@ -33,6 +37,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  accounts: typeof accounts;
+  accountsDb: typeof accountsDb;
+  auth: typeof auth;
   authz: typeof authz;
   clock: typeof clock;
   crates: typeof crates;
@@ -40,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   "data/iridiumTle": typeof data_iridiumTle;
   forecast: typeof forecast;
   geo: typeof geo;
+  http: typeof http;
   inventory: typeof inventory;
   link: typeof link;
   messages: typeof messages;

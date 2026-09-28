@@ -1,12 +1,13 @@
 import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { distanceKm } from "./geo";
-import { requirePermission } from "./authz";
+import { requirePermission, requireSelf, signedInQuery } from "./authz";
 
 /** Field preset: Safe / Delayed / Need help. Updates the team's check-in clock. */
 export const checkIn = mutation({
   args: { personId: v.id("people"), lat: v.optional(v.number()), lon: v.optional(v.number()) },
   handler: async (ctx, { personId, lat, lon }) => {
+    await requireSelf(ctx, personId);
     const now = Date.now();
     await ctx.db.patch(personId, { lastSeen: now, ...(lat !== undefined ? { lastLat: lat, lastLon: lon } : {}) });
     const teams = await ctx.db.query("teams").collect();
@@ -49,9 +50,9 @@ export const checkMissed = internalMutation({
 
 /** Demo helper: make one team overdue and raise its alert immediately. */
 export const simulateMissed = mutation({
-  args: { teamId: v.id("teams"), actorId: v.id("people") },
-  handler: async (ctx, { teamId, actorId }) => {
-    await requirePermission(ctx, actorId, "demo.control");
+  args: { teamId: v.id("teams") },
+  handler: async (ctx, { teamId }) => {
+    await requirePermission(ctx, "demo.control");
     const t = await ctx.db.get(teamId);
     if (!t) throw new Error("Unknown team");
     const now = Date.now();
@@ -62,9 +63,10 @@ export const simulateMissed = mutation({
 
 /** Goa has seen an SOS: stamp it and close its alert. The reply itself goes through the link. */
 export const acknowledge = mutation({
-  args: { messageId: v.id("messages"), byId: v.id("people") },
-  handler: async (ctx, { messageId, byId }) => {
-    await requirePermission(ctx, byId, "sos.acknowledge");
+  args: { messageId: v.id("messages") },
+  handler: async (ctx, { messageId }) => {
+    const me = await requirePermission(ctx, "sos.acknowledge");
+    const byId = me._id;
     const m = await ctx.db.get(messageId);
     if (!m || m.priority !== "sos") throw new Error("Not an SOS message");
     await ctx.db.patch(messageId, { ackAt: Date.now(), ackBy: byId });
@@ -74,16 +76,16 @@ export const acknowledge = mutation({
   },
 });
 
-export const openAlerts = query({
+export const openAlerts = signedInQuery({
   args: {},
   handler: async (ctx) =>
     (await ctx.db.query("alerts").withIndex("by_resolved", (q) => q.eq("resolved", false)).collect()).sort((a, b) => b.ts - a.ts),
 });
 
 export const resolve = mutation({
-  args: { id: v.id("alerts"), actorId: v.id("people") },
-  handler: async (ctx, { id, actorId }) => {
-    await requirePermission(ctx, actorId, "alert.resolve");
+  args: { id: v.id("alerts") },
+  handler: async (ctx, { id }) => {
+    await requirePermission(ctx, "alert.resolve");
     await ctx.db.patch(id, { resolved: true });
   },
 });
@@ -91,7 +93,7 @@ export const resolve = mutation({
 const SPEED_KMH = { foot: 8, vehicle: 20 };
 
 /** Nearest other teams to a point, with ETA by travel mode. */
-export const nearest = query({
+export const nearest = signedInQuery({
   args: { lat: v.number(), lon: v.number(), excludeTeamId: v.optional(v.id("teams")) },
   handler: async (ctx, { lat, lon, excludeTeamId }) => {
     const teams = await ctx.db.query("teams").collect();
@@ -108,7 +110,7 @@ export const nearest = query({
 });
 
 /** Most recent SOS that has reached Goa, with its position. */
-export const latestDelivered = query({
+export const latestDelivered = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const sent = await ctx.db.query("messages").order("desc").take(100);

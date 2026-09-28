@@ -11,7 +11,8 @@ const COORDS = { MAITRI: [-70.7667, 11.7333], BHARATI: [-69.4081, 76.1878] };
  */
 export const heliSlots = action({
   args: { stationCode: v.union(v.literal("MAITRI"), v.literal("BHARATI")) },
-  handler: async (_ctx, { stationCode }) => {
+  handler: async (ctx, { stationCode }) => {
+    if (!(await ctx.auth.getUserIdentity())) throw new Error("Please sign in.");
     const [lat, lon] = COORDS[stationCode];
     const url =
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +

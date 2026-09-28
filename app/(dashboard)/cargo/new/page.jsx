@@ -38,7 +38,6 @@ export default function NewCratePage() {
         coldChain: form.coldChain,
         priority: Number(form.priority),
         destination: form.destination,
-        actorId: me._id,
       });
       const png = await QRCode.toDataURL(qrId, { margin: 1, width: 320, color: { dark: "#050b18", light: "#ffffff" } });
       setLabel({ id, qrId, png, ...form, weightKg: weight });

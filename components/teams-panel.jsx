@@ -39,7 +39,7 @@ export function TeamsPanel() {
                   variant="ghost"
                   size="sm"
                   disabled={overdue}
-                  onClick={() => simulate({ teamId: team._id, actorId: me._id })}
+                  onClick={() => simulate({ teamId: team._id })}
                   title={t("Demo: make this team miss its check-in now")}
                 >
                   <TimerOff size={14} /> {t("Simulate missed")}

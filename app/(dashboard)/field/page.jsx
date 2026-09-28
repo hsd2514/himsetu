@@ -8,8 +8,8 @@ import { PassCountdowns } from "@/components/pass-countdown";
 import { useSend } from "@/components/composer";
 import { MessageRow } from "@/components/message-row";
 import { useMe, useNow } from "@/components/use-me";
-import { useStation } from "@/components/station-context";
 import { useT } from "@/components/language-context";
+import { NotAllowed } from "@/components/not-allowed";
 
 // Fallback position near Maitri if the browser has no GPS (simulated, shown as such).
 const FALLBACK = { lat: -70.812, lon: 11.61, simulated: true };
@@ -33,8 +33,7 @@ function useGps() {
 }
 
 export default function FieldPage() {
-  const { node, setNodeCode } = useStation();
-  const { me, keyReady } = useMe();
+  const { me, keyReady, can } = useMe();
   const gps = useGps();
   const send = useSend(me);
   const checkIn = useMutation(api.sos.checkIn);
@@ -56,10 +55,6 @@ export default function FieldPage() {
       window.removeEventListener("offline", update);
     };
   }, []);
-
-  useEffect(() => {
-    if (node.code !== "FIELD") setNodeCode("FIELD");
-  }, [node.code, setNodeCode]);
 
   /** Check in and send one action over the link. Returns an error string or null. */
   const deliver = useCallback(
@@ -113,6 +108,8 @@ export default function FieldPage() {
   }
 
   const outgoing = (messages ?? []).filter((m) => m.outgoing).slice(0, 4);
+
+  if (me && !can("field.report")) return <NotAllowed role={me.role} what="send field reports" />;
 
   return (
     <div className="mx-auto grid max-w-md gap-4">

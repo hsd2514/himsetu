@@ -28,7 +28,7 @@ export function AlertBanner() {
       <span className="truncate">{top.text}</span>
       {alerts.length > 1 && <span className="shrink-0 opacity-80">{t("+{n} more", { n: alerts.length - 1 })}</span>}
       {can("alert.resolve") && <button
-        onClick={() => resolve({ id: top._id, actorId: me._id })}
+        onClick={() => resolve({ id: top._id })}
         className="ml-auto flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs hover:bg-white/10"
       >
         <X size={14} /> {t("Resolve")}

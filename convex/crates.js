@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requirePermission } from "./authz";
+import { requirePermission, signedInQuery } from "./authz";
 
 const HOPS = ["warehouse", "port", "ship_hold", "helideck", "station"];
 const HOP_STATION = { warehouse: "GOA", port: "CPT", ship_hold: "SHIP", helideck: "SHIP" };
@@ -9,7 +9,7 @@ const MAX_NOTE = 200;
 /** Labels are printed upper-case; accept what a person types or a scanner reads. */
 const normalizeLabel = (s) => s.trim().toUpperCase();
 
-export const list = query({
+export const list = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const crates = await ctx.db.query("crates").order("desc").collect();
@@ -17,7 +17,7 @@ export const list = query({
   },
 });
 
-export const get = query({
+export const get = signedInQuery({
   args: { id: v.id("crates") },
   handler: async (ctx, { id }) => {
     const crate = await ctx.db.get(id);
@@ -32,7 +32,7 @@ export const get = query({
   },
 });
 
-export const byQr = query({
+export const byQr = signedInQuery({
   args: { qrId: v.string() },
   handler: async (ctx, { qrId }) =>
     ctx.db.query("crates").withIndex("by_qr", (q) => q.eq("qrId", normalizeLabel(qrId))).first(),
@@ -46,11 +46,10 @@ export const create = mutation({
     coldChain: v.boolean(),
     priority: v.number(),
     destination: v.union(v.literal("MAITRI"), v.literal("BHARATI")),
-    actorId: v.id("people"),
   },
 
-  handler: async (ctx, { actorId, ...args }) => {
-    const actor = await requirePermission(ctx, actorId, "crate.create");
+  handler: async (ctx, args) => {
+    const actor = await requirePermission(ctx, "crate.create");
     const scannedBy = actor.name;
     /*
      * Collision-safe crate IDs:
@@ -145,12 +144,11 @@ export const scan = mutation({
       v.literal("helideck"),
       v.literal("station")
     ),
-    actorId: v.id("people"),
     note: v.optional(v.string()),
   },
 
-  handler: async (ctx, { qrId, hop, actorId, note }) => {
-    const actor = await requirePermission(ctx, actorId, "crate.scan");
+  handler: async (ctx, { qrId, hop, note }) => {
+    const actor = await requirePermission(ctx, "crate.scan");
     const scannedBy = actor.name;
     const label = normalizeLabel(qrId);
     const crate = await ctx.db.query("crates").withIndex("by_qr", (q) => q.eq("qrId", label)).first();
@@ -170,7 +168,7 @@ export const scan = mutation({
   },
 });
 
-export const stats = query({
+export const stats = signedInQuery({
   args: {},
   handler: async (ctx) => {
     const crates = await ctx.db.query("crates").collect();

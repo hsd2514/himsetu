@@ -7,6 +7,7 @@
  * Uses NEXT_PUBLIC_CONVEX_URL from .env.local; set CONVEX_URL to target another deployment.
  */
 import { readFile, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { ConvexHttpClient } from "convex/browser";
 import { makeFunctionReference } from "convex/server";
 
@@ -42,7 +43,16 @@ async function importForecast(path) {
     points: points.map(({ date, qty }) => ({ date, qty })),
     ...(stockOutDate != null ? { stockOutDate } : {}),
   }));
-  const n = await call("mutation", "forecast:importTimesfm", { rows: clean });
+  // importTimesfm is internal (browsers cannot call it), so go through the Convex CLI,
+  // which uses this machine's deployment credentials. One row per call keeps the
+  // command line short on Windows. Add `--prod` via CONVEX_RUN_FLAGS for production.
+  let n = 0;
+  for (const row of clean) {
+    const args = ["node_modules/convex/bin/main.js", "run", ...(process.env.CONVEX_RUN_FLAGS ?? "").split(" ").filter(Boolean), "forecast:importTimesfm", JSON.stringify({ rows: [row] })];
+    const res = spawnSync(process.execPath, args, { encoding: "utf8" });
+    if (res.status !== 0) fail(`forecast:importTimesfm failed: ${(res.stderr || res.stdout).trim().split("\n").pop()}`);
+    n += 1;
+  }
   console.log(`Imported ${n} TimesFM-3 forecast${n === 1 ? "" : "s"}${doc.model ? ` from ${doc.model}` : ""}.`);
   for (const r of clean) {
     const out = r.stockOutDate ? new Date(r.stockOutDate).toISOString().slice(0, 10) : "stays above safety";
