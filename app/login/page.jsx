@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useConvexAuth, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Anchor, Building2, KeyRound, LogIn, Radio, Ship, Snowflake } from "lucide-react";
+import { Anchor, Building2, Check, Copy, KeyRound, LogIn, Radio, Ship, Snowflake } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/field";
@@ -18,6 +18,33 @@ const ACCOUNTS = [
   { email: "bharati@himsetu.demo", label: "Bharati Station", role: "Station lead", icon: Anchor },
   { email: "field@himsetu.demo", label: "Field Team (Maitri)", role: "Field team", icon: Radio },
 ];
+
+/** One labelled credential with a copy button. */
+function CredRow({ label, value, t }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  }
+  return (
+    <div className="grid grid-cols-[72px_1fr_auto] items-center gap-2">
+      <dt className="text-[11px] text-slate-400">{label}</dt>
+      <dd className="truncate rounded-md bg-navy-950/60 px-2 py-1 font-mono text-xs text-slate-100">{value}</dd>
+      <button
+        type="button"
+        onClick={copy}
+        aria-label={t("Copy {what}", { what: label })}
+        title={t("Copy {what}", { what: label })}
+        className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-100"
+      >
+        {copied ? <Check size={14} className="text-emerald-300" /> : <Copy size={14} />}
+      </button>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const { signIn } = useAuthActions();
@@ -116,13 +143,15 @@ export default function LoginPage() {
           </Button>
 
           {demo?.password && (
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-dashed border-white/10 px-3 py-2 text-xs text-slate-400">
-              <KeyRound size={13} className="text-ice-300" />
-              <span>{t("Test login")}:</span>
-              <span className="font-mono text-slate-200">{email}</span>
-              <span>/</span>
-              <span className="font-mono text-slate-200">{demo.password}</span>
-              <span className="w-full text-[11px] text-slate-500">{t("Same password for all five demo accounts.")}</span>
+            <div className="rounded-xl border border-ice-500/25 bg-ice-500/[0.06] p-3">
+              <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-ice-300">
+                <KeyRound size={13} /> {t("Demo login")}
+              </div>
+              <dl className="grid gap-1.5">
+                <CredRow label={t("Email")} value={email} t={t} />
+                <CredRow label={t("Password")} value={demo.password} t={t} />
+              </dl>
+              <p className="mt-2 text-[11px] text-slate-500">{t("Same password for all five demo accounts.")}</p>
             </div>
           )}
         </form>
