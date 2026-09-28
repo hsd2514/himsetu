@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/field";
 import { HOP_LABEL, HopProgress } from "@/components/hop-progress";
 import { useT } from "@/components/language-context";
+import { useMe } from "@/components/use-me";
 import { cn } from "@/lib/utils";
 
 // Chip id, label, icon, and the crate test it applies.
@@ -25,6 +26,7 @@ export default function CargoPage() {
   const [chips, setChips] = useState([]);
   const toggle = (id) => setChips((on) => (on.includes(id) ? on.filter((x) => x !== id) : [...on, id]));
   const t = useT();
+  const { can } = useMe();
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -40,12 +42,12 @@ export default function CargoPage() {
     <>
       <PageHeader title={t("Cargo")} subtitle={t("Chain of custody from the Goa warehouse to the station.")}>
         <div className="flex gap-2">
-          <Link href="/cargo/scan" className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-sm text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.98]">
+          {can("crate.scan") && <Link href="/cargo/scan" className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 text-sm text-slate-200 transition-colors hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.98]">
             <ScanLine size={16} /> {t("Scan")}
-          </Link>
-          <Link href="/cargo/new" className="inline-flex h-9 items-center gap-2 rounded-lg bg-ice-500 px-4 text-sm font-medium text-navy-950 shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] transition-colors hover:bg-ice-400 active:scale-[0.98]">
+          </Link>}
+          {can("crate.create") && <Link href="/cargo/new" className="inline-flex h-9 items-center gap-2 rounded-lg bg-ice-500 px-4 text-sm font-medium text-navy-950 shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] transition-colors hover:bg-ice-400 active:scale-[0.98]">
             <Plus size={16} /> {t("New crate")}
-          </Link>
+          </Link>}
         </div>
       </PageHeader>
 

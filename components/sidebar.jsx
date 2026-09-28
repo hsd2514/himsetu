@@ -7,6 +7,8 @@ import { NODES, useStation } from "@/components/station-context";
 import { LanguageToggle, useT } from "@/components/language-context";
 import { useNow } from "@/components/use-me";
 import { ThemePicker } from "@/components/theme-context";
+import { useMe } from "@/components/use-me";
+import { ROLE_LABEL } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -37,6 +39,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { node, setNodeCode } = useStation();
   const t = useT();
+  const { me } = useMe();
   const active = (href) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
@@ -68,7 +71,10 @@ export function Sidebar() {
           ))}
         </select>
         <ChevronsUpDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
-        <LocalClock tz={node.tz} />
+        <span className="mt-0.5 flex items-center justify-between gap-2">
+          <LocalClock tz={node.tz} />
+          {me && <span title={me.name} className="truncate rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-slate-300">{t(ROLE_LABEL[me.role])}</span>}
+        </span>
       </label>
 
       <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0">

@@ -114,7 +114,7 @@ export default defineSchema({
   messages: defineTable({
     fromId: v.id("people"),
     fromStation: station,
-    toType: v.union(v.literal("user"), v.literal("team"), v.literal("station"), v.literal("broadcast")),
+    toType: v.union(v.literal("user"), v.literal("team"), v.literal("station"), v.literal("stakeholders"), v.literal("broadcast")),
     toId: v.string(),
     recipientIds: v.array(v.id("people")),
     priority,
@@ -131,6 +131,7 @@ export default defineSchema({
     sentAt: v.optional(v.number()),
     deliveredAt: v.optional(v.number()),
     attempts: v.number(),
+    readBy: v.optional(v.array(v.id("people"))), // recipients who opened it
     ackAt: v.optional(v.number()), // SOS acknowledged at Goa
     ackBy: v.optional(v.id("people")),
   })

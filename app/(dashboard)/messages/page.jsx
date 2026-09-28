@@ -12,7 +12,7 @@ import { useMe, useNow } from "@/components/use-me";
 import { useT } from "@/components/language-context";
 
 export default function MessagesPage() {
-  const { me, node, keyReady } = useMe();
+  const { me, node, keyReady, can } = useMe();
   const people = useQuery(api.people.list) ?? [];
   const teams = useQuery(api.people.teams) ?? [];
   const messages = useQuery(api.messages.forPerson, me ? { personId: me._id } : "skip");
@@ -42,7 +42,8 @@ export default function MessagesPage() {
                 <optgroup label={t("People")}>
                   {people.filter((p) => p._id !== me?._id).map((p) => <option key={p._id} value={`user:${p._id}`}>{p.name}</option>)}
                 </optgroup>
-                <option value="broadcast:all">{t("Broadcast to everyone")}</option>
+                <option value="stakeholders:all">{t("All stakeholders (Goa, ship, station leads)")}</option>
+                {can("message.broadcast") && <option value="broadcast:all">{t("Broadcast to everyone")}</option>}
               </Select>
             </Field>
             <Field label={t("Priority")}>

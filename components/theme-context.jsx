@@ -4,13 +4,6 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useT } from "@/components/language-context";
 import { cn } from "@/lib/utils";
 
-export const THEMES = [
-  { id: "ice", name: "Ice", swatch: "#2aa8e0" },
-  { id: "graphite", name: "Graphite", swatch: "#f97316" },
-  { id: "polar", name: "Polar", swatch: "#3b82f6" },
-  { id: "aurora", name: "Aurora", swatch: "#10b981" },
-  { id: "saffron", name: "Saffron", swatch: "#f59e0b" },
-];
 const MODES = [
   { id: "light", icon: Sun, label: "Light" },
   { id: "dark", icon: Moon, label: "Dark" },
@@ -21,18 +14,21 @@ const MODES = [
  * Runs before first paint (inlined in <head>) so the saved theme applies
  * without a flash of the default palette.
  */
-export const THEME_BOOT = `(function(){try{var d=document.documentElement;var t=localStorage.getItem("himsetu.theme")||"ice";var m=localStorage.getItem("himsetu.mode")||"dark";if(m==="system")m=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";d.dataset.theme=t;d.dataset.mode=m;}catch(e){document.documentElement.dataset.theme="ice";document.documentElement.dataset.mode="dark";}})();`;
+export const THEME_BOOT = `(function(){try{var d=document.documentElement;var t="ice";var m=localStorage.getItem("himsetu.mode")||"dark";if(m==="system")m=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";d.dataset.theme=t;d.dataset.mode=m;}catch(e){document.documentElement.dataset.theme="ice";document.documentElement.dataset.mode="dark";}})();`;
 
-const ThemeCtx = createContext({ theme: "ice", mode: "dark", resolved: "dark", setTheme() {}, setMode() {} });
+// One palette (Ice). Only light / dark is user-selectable.
+const THEME = "ice";
+
+const ThemeCtx = createContext({ theme: THEME, mode: "dark", resolved: "dark", setMode() {} });
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState("ice");
+  const theme = THEME;
   const [mode, setModeState] = useState("dark");
   const [systemLight, setSystemLight] = useState(false);
 
   useEffect(() => {
     try {
-      setThemeState(localStorage.getItem("himsetu.theme") || "ice");
+      localStorage.removeItem("himsetu.theme"); // left over from the palette picker
       setModeState(localStorage.getItem("himsetu.mode") || "dark");
     } catch {}
     const mq = matchMedia("(prefers-color-scheme: light)");
@@ -54,12 +50,6 @@ export function ThemeProvider({ children }) {
       theme,
       mode,
       resolved,
-      setTheme: (t) => {
-        setThemeState(t);
-        try {
-          localStorage.setItem("himsetu.theme", t);
-        } catch {}
-      },
       setMode: (m) => {
         setModeState(m);
         try {
@@ -107,31 +97,12 @@ export function useThemeColors() {
   return colors;
 }
 
-/** Palette swatches + light/dark/system switch, for the sidebar. */
+/** Light / dark / system switch, for the sidebar. */
 export function ThemePicker() {
-  const { theme, mode, setTheme, setMode } = useTheme();
+  const { mode, setMode } = useTheme();
   const t = useT();
   return (
     <div className="grid gap-2.5">
-      <div className="flex items-center justify-between">
-        <div role="radiogroup" aria-label={t("Colour theme")} className="flex gap-1.5">
-          {THEMES.map((t) => (
-            <button
-              key={t.id}
-              role="radio"
-              aria-checked={theme === t.id}
-              aria-label={t.name}
-              title={t.name}
-              onClick={() => setTheme(t.id)}
-              className={cn(
-                "h-5 w-5 rounded-full ring-offset-2 ring-offset-navy-950 transition-transform active:scale-90",
-                theme === t.id ? "ring-2 ring-slate-300" : "opacity-80 hover:opacity-100"
-              )}
-              style={{ background: t.swatch }}
-            />
-          ))}
-        </div>
-      </div>
       <div role="radiogroup" aria-label={t("Light or dark")} className="grid grid-cols-3 rounded-lg border border-white/10 p-0.5">
         {MODES.map(({ id, icon: Icon, label }) => (
           <button

@@ -9,12 +9,13 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
+import { NotAllowed } from "@/components/not-allowed";
 import { useMe } from "@/components/use-me";
 import { useT } from "@/components/language-context";
 
 export default function NewCratePage() {
   const create = useMutation(api.crates.create);
-  const { me } = useMe();
+  const { me, can } = useMe();
   const [form, setForm] = useState({ item: "Diesel drum #214", weightKg: "210", destination: "MAITRI", priority: "1", hazmat: true, coldChain: false });
   const [label, setLabel] = useState(null);
   const [error, setError] = useState(null);
@@ -37,7 +38,7 @@ export default function NewCratePage() {
         coldChain: form.coldChain,
         priority: Number(form.priority),
         destination: form.destination,
-        scannedBy: me?.name ?? "Goa warehouse",
+        actorId: me._id,
       });
       const png = await QRCode.toDataURL(qrId, { margin: 1, width: 320, color: { dark: "#050b18", light: "#ffffff" } });
       setLabel({ id, qrId, png, ...form, weightKg: weight });
@@ -47,6 +48,8 @@ export default function NewCratePage() {
       setBusy(false);
     }
   }
+
+  if (me && !can("crate.create")) return <NotAllowed role={me.role} what="create crates" />;
 
   return (
     <>

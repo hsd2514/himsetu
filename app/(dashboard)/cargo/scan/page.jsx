@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { HOPS, HOP_LABEL, HopProgress } from "@/components/hop-progress";
 import { QrScanner, cameraSupported } from "@/components/qr-scanner";
+import { NotAllowed } from "@/components/not-allowed";
 import { useMe } from "@/components/use-me";
 
 const DEFAULT_HOP = { GOA: "warehouse", SHIP: "ship_hold", MAITRI: "station", BHARATI: "station", FIELD: "station" };
@@ -24,7 +25,7 @@ function suggestHop(status, nodeCode) {
 }
 
 export default function ScanPage() {
-  const { me, node } = useMe();
+  const { me, node, can } = useMe();
   const scan = useMutation(api.crates.scan);
   const [qrId, setQrId] = useState("");
   const [hop, setHop] = useState("");
@@ -60,7 +61,7 @@ export default function ScanPage() {
     setError(null);
     setBusy(true);
     try {
-      const res = await scan({ qrId: label, hop, scannedBy: me?.name ?? node.label, note: note.trim() || undefined });
+      const res = await scan({ qrId: label, hop, actorId: me._id, note: note.trim() || undefined });
       setLogged((l) => [res, ...l].slice(0, 6));
       setQrId("");
       setNote("");
@@ -70,6 +71,8 @@ export default function ScanPage() {
       setBusy(false);
     }
   }
+
+  if (me && !can("crate.scan")) return <NotAllowed role={me.role} what="log cargo handovers" />;
 
   return (
     <>

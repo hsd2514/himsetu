@@ -1,4 +1,6 @@
 import { mutation, internalMutation } from "./_generated/server";
+import { v } from "convex/values";
+import { requirePermission } from "./authz";
 import { internal } from "./_generated/api";
 
 // Everything below is SIMULATED demo data. Real deployments load manifests from NCPOR.
@@ -54,7 +56,17 @@ const INVENTORY = {
 
 const DAY = 86400000;
 
+/** From the UI: planners only. From the CLI use `npx convex run seed:resetAll`. */
 export const reset = mutation({
+  args: { actorId: v.id("people") },
+  handler: async (ctx, { actorId }) => {
+    await requirePermission(ctx, actorId, "demo.control");
+    await ctx.runMutation(internal.seed.resetAll, {});
+    return "reset";
+  },
+});
+
+export const resetAll = internalMutation({
   args: {},
   handler: async (ctx) => {
     for (const t of ["stations", "people", "teams", "crates", "events", "inventory", "consumption", "forecasts", "passes", "messages", "linkWindows", "alerts", "settings"]) {

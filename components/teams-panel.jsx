@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useNow } from "@/components/use-me";
+import { useMe, useNow } from "@/components/use-me";
 import { useT } from "@/components/language-context";
 
 /** Field teams with time since last check-in, plus a demo trigger for a missed check-in. */
@@ -14,6 +14,7 @@ export function TeamsPanel() {
   const simulate = useMutation(api.sos.simulateMissed);
   const now = useNow(15000);
   const t = useT();
+  const { me, can } = useMe();
 
   return (
     <Card>
@@ -34,15 +35,15 @@ export function TeamsPanel() {
                   {t("{m} min ago", { m: mins })} / {team.checkInEveryMin}
                 </span>
                 {overdue ? <Badge tone="amber">{t("Overdue")}</Badge> : <Badge tone="green">{t("On time")}</Badge>}
-                <Button
+                {can("demo.control") && <Button
                   variant="ghost"
                   size="sm"
                   disabled={overdue}
-                  onClick={() => simulate({ teamId: team._id })}
+                  onClick={() => simulate({ teamId: team._id, actorId: me._id })}
                   title={t("Demo: make this team miss its check-in now")}
                 >
                   <TimerOff size={14} /> {t("Simulate missed")}
-                </Button>
+                </Button>}
               </li>
             );
           })}

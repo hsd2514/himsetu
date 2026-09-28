@@ -20,6 +20,7 @@ const STATUS = {
 function recipientLabel(m, t) {
   if (m.toType === "user") return t("one person");
   if (m.toType === "broadcast") return t("everyone");
+  if (m.toType === "stakeholders") return t("all stakeholders");
   if (m.toType === "station") return t("station {code}", { code: m.toId });
   return t("a team");
 }
@@ -31,7 +32,7 @@ export function MessageRow({ m, me, now }) {
 
   useEffect(() => {
     decryptFor(m, me._id).then(setText);
-    if (!m.outgoing && m.status === "delivered") markRead({ id: m._id });
+    if (!m.outgoing && m.status === "delivered" && !(m.readBy ?? []).includes(me._id)) markRead({ id: m._id, personId: me._id });
   }, [m, me._id, markRead]);
 
   const S = STATUS[m.status];
@@ -47,6 +48,9 @@ export function MessageRow({ m, me, now }) {
       <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-400">
         <S.icon size={12} className={m.status === "read" ? "text-ice-300" : ""} />
         {t(S.label)}
+        {m.outgoing && m.recipientIds.length > 1 && (m.status === "delivered" || m.status === "read") && (
+          <span>{t("read by {n} of {total}", { n: (m.readBy ?? []).length, total: m.recipientIds.length })}</span>
+        )}
         {m.status === "queued" && m.releaseAt && <span className="font-mono">{t("in {time}", { time: fmtCountdown(m.releaseAt - now) })}</span>}
         <span className="ml-auto font-mono">{m.bytes} B · {fmtTime(m.queuedAt, m.fromStation)}</span>
       </div>

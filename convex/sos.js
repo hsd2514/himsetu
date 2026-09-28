@@ -1,6 +1,7 @@
 import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { distanceKm } from "./geo";
+import { requirePermission } from "./authz";
 
 /** Field preset: Safe / Delayed / Need help. Updates the team's check-in clock. */
 export const checkIn = mutation({
@@ -48,8 +49,9 @@ export const checkMissed = internalMutation({
 
 /** Demo helper: make one team overdue and raise its alert immediately. */
 export const simulateMissed = mutation({
-  args: { teamId: v.id("teams") },
-  handler: async (ctx, { teamId }) => {
+  args: { teamId: v.id("teams"), actorId: v.id("people") },
+  handler: async (ctx, { teamId, actorId }) => {
+    await requirePermission(ctx, actorId, "demo.control");
     const t = await ctx.db.get(teamId);
     if (!t) throw new Error("Unknown team");
     const now = Date.now();
@@ -62,6 +64,7 @@ export const simulateMissed = mutation({
 export const acknowledge = mutation({
   args: { messageId: v.id("messages"), byId: v.id("people") },
   handler: async (ctx, { messageId, byId }) => {
+    await requirePermission(ctx, byId, "sos.acknowledge");
     const m = await ctx.db.get(messageId);
     if (!m || m.priority !== "sos") throw new Error("Not an SOS message");
     await ctx.db.patch(messageId, { ackAt: Date.now(), ackBy: byId });
@@ -78,8 +81,11 @@ export const openAlerts = query({
 });
 
 export const resolve = mutation({
-  args: { id: v.id("alerts") },
-  handler: async (ctx, { id }) => ctx.db.patch(id, { resolved: true }),
+  args: { id: v.id("alerts"), actorId: v.id("people") },
+  handler: async (ctx, { id, actorId }) => {
+    await requirePermission(ctx, actorId, "alert.resolve");
+    await ctx.db.patch(id, { resolved: true });
+  },
 });
 
 const SPEED_KMH = { foot: 8, vehicle: 20 };

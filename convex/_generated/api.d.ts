@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as authz from "../authz.js";
 import type * as clock from "../clock.js";
 import type * as crates from "../crates.js";
 import type * as crons from "../crons.js";
@@ -32,6 +33,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  authz: typeof authz;
   clock: typeof clock;
   crates: typeof crates;
   crons: typeof crons;

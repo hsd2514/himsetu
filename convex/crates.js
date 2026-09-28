@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { requirePermission } from "./authz";
 
 const HOPS = ["warehouse", "port", "ship_hold", "helideck", "station"];
 const HOP_STATION = { warehouse: "GOA", port: "CPT", ship_hold: "SHIP", helideck: "SHIP" };
@@ -45,10 +46,12 @@ export const create = mutation({
     coldChain: v.boolean(),
     priority: v.number(),
     destination: v.union(v.literal("MAITRI"), v.literal("BHARATI")),
-    scannedBy: v.string(),
+    actorId: v.id("people"),
   },
 
-  handler: async (ctx, args) => {
+  handler: async (ctx, { actorId, ...args }) => {
+    const actor = await requirePermission(ctx, actorId, "crate.create");
+    const scannedBy = actor.name;
     /*
      * Collision-safe crate IDs:
      * - A persistent counter is used instead of counting crate rows.
@@ -105,7 +108,7 @@ export const create = mutation({
     const qrId = `HMS-${1000 + nextSeq}`;
     const now = Date.now();
 
-    const { scannedBy, ...rest } = args;
+    const rest = args;
 
     const id = await ctx.db.insert("crates", {
       ...rest,
@@ -142,11 +145,13 @@ export const scan = mutation({
       v.literal("helideck"),
       v.literal("station")
     ),
-    scannedBy: v.string(),
+    actorId: v.id("people"),
     note: v.optional(v.string()),
   },
 
-  handler: async (ctx, { qrId, hop, scannedBy, note }) => {
+  handler: async (ctx, { qrId, hop, actorId, note }) => {
+    const actor = await requirePermission(ctx, actorId, "crate.scan");
+    const scannedBy = actor.name;
     const label = normalizeLabel(qrId);
     const crate = await ctx.db.query("crates").withIndex("by_qr", (q) => q.eq("qrId", label)).first();
     if (!crate) throw new Error(`No crate with label ${label}`);

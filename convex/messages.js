@@ -1,16 +1,21 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ensureWindow } from "./link";
+import { requirePermission } from "./authz";
 
 export const MAX_BYTES = 340;
 
 const priority = v.union(v.literal("sos"), v.literal("medical"), v.literal("ops"), v.literal("normal"));
 
-/** Resolve who a message is for. Team = its members, station = everyone there, broadcast = all. */
+/**
+ * Resolve who a message is for. Team = its members, station = everyone there,
+ * stakeholders = the Goa planner and every station / ship lead, broadcast = all.
+ */
 async function resolveRecipients(ctx, toType, toId, fromId) {
   const people = await ctx.db.query("people").collect();
   if (toType === "user") return people.filter((p) => p._id === toId);
   if (toType === "station") return people.filter((p) => p.stationCode === toId && p._id !== fromId);
+  if (toType === "stakeholders") return people.filter((p) => (p.role === "planner" || p.role === "lead") && p._id !== fromId);
   if (toType === "team") {
     const team = await ctx.db.get(toId);
     return people.filter((p) => team?.memberIds.includes(p._id) && p._id !== fromId);
@@ -30,7 +35,7 @@ export const recipients = query({
 export const send = mutation({
   args: {
     fromId: v.id("people"),
-    toType: v.union(v.literal("user"), v.literal("team"), v.literal("station"), v.literal("broadcast")),
+    toType: v.union(v.literal("user"), v.literal("team"), v.literal("station"), v.literal("stakeholders"), v.literal("broadcast")),
     toId: v.string(),
     priority,
     ciphertext: v.string(),
@@ -44,6 +49,7 @@ export const send = mutation({
     if (args.bytes > MAX_BYTES) throw new Error(`Message is ${args.bytes} bytes; the satellite limit is ${MAX_BYTES}.`);
     const from = await ctx.db.get(args.fromId);
     if (!from) throw new Error("Unknown sender");
+    if (args.toType === "broadcast") await requirePermission(ctx, args.fromId, "message.broadcast");
     const recipients = await resolveRecipients(ctx, args.toType, args.toId, args.fromId);
     const now = Date.now();
 
@@ -81,11 +87,17 @@ export const forPerson = query({
   },
 });
 
+/** A recipient opened the message. It turns "read" once every recipient has. */
 export const markRead = mutation({
-  args: { id: v.id("messages") },
-  handler: async (ctx, { id }) => {
+  args: { id: v.id("messages"), personId: v.id("people") },
+  handler: async (ctx, { id, personId }) => {
     const m = await ctx.db.get(id);
-    if (m?.status === "delivered") await ctx.db.patch(id, { status: "read" });
+    if (!m || !m.recipientIds.includes(personId)) return;
+    if (m.status !== "delivered" && m.status !== "read") return;
+    const readBy = m.readBy ?? [];
+    if (readBy.includes(personId)) return;
+    const next = [...readBy, personId];
+    await ctx.db.patch(id, { readBy: next, status: next.length >= m.recipientIds.length ? "read" : "delivered" });
   },
 });
 

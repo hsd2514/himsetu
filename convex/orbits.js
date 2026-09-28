@@ -1,6 +1,7 @@
 "use node";
 import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { v } from "convex/values";
 import { twoline2satrec, propagate, gstime, eciToEcf, ecfToLookAngles, degreesToRadians } from "satellite.js";
 import { IRIDIUM_TLE } from "./data/iridiumTle";
 
@@ -88,7 +89,10 @@ export const refresh = internalAction({
 
 /** Manual trigger from the UI. */
 export const refreshNow = action({
-  args: {},
-  handler: async (ctx) => ctx.runAction(internal.orbits.refresh, {}),
+  args: { actorId: v.id("people") },
+  handler: async (ctx, { actorId }) => {
+    await ctx.runQuery(internal.people.assertCan, { actorId, perm: "demo.control" });
+    return ctx.runAction(internal.orbits.refresh, {});
+  },
 });
 

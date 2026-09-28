@@ -15,6 +15,7 @@ import { LinkQueue } from "@/components/link-queue";
 import { NextWindows } from "@/components/next-windows";
 import { TeamsPanel } from "@/components/teams-panel";
 import { useStation } from "@/components/station-context";
+import { useMe } from "@/components/use-me";
 import { useT } from "@/components/language-context";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,8 @@ function Kpi({ label, value, tone, href }) {
 
 export default function MissionPage() {
   const { node } = useStation();
+  const { me, can } = useMe();
+  const demoControl = can("demo.control");
   const t = useT();
   const stations = useQuery(api.stations.list);
   const crateStats = useQuery(api.crates.stats);
@@ -51,7 +54,7 @@ export default function MissionPage() {
   async function refresh() {
     setRefreshing(true);
     try {
-      await refreshPasses();
+      await refreshPasses({ actorId: me._id });
     } finally {
       setRefreshing(false);
     }
@@ -73,14 +76,14 @@ export default function MissionPage() {
   return (
     <>
       <PageHeader title={t(node.code === "GOA" ? "NCPOR Goa Hub" : node.label)} subtitle={t("Every crate, drum and person on one map, refreshed at each satellite pass.")}>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setSpeed({ demoSpeed: speed === 60 ? 1 : 60 })}>
+        {demoControl && <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setSpeed({ demoSpeed: speed === 60 ? 1 : 60, actorId: me._id })}>
             <Gauge size={14} /> {t(speed === 60 ? "Demo speed 60×" : "Real time")}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => reset()}>
+          <Button variant="ghost" size="sm" onClick={() => reset({ actorId: me._id })}>
             <RotateCcw size={14} /> {t("Reset demo")}
           </Button>
-        </div>
+        </div>}
       </PageHeader>
 
       {/* 1px gaps over a line-coloured backing draw the dividers at every breakpoint. */}
@@ -99,9 +102,9 @@ export default function MissionPage() {
             {tleAgeH !== null && ` ${t("Fetched {h} h ago.", { h: tleAgeH })}`}
             {speed === 60 && ` ${t("Demo mode: one real second is one mission minute.")}`}
           </span>
-          <button onClick={refresh} disabled={refreshing} className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-ice-300 hover:bg-white/[0.05] disabled:opacity-50">
+          {demoControl && <button onClick={refresh} disabled={refreshing} className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-ice-300 hover:bg-white/[0.05] disabled:opacity-50">
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} /> {t(refreshing ? "Recomputing passes…" : "Refresh passes")}
-          </button>
+          </button>}
         </div>
       </section>
 

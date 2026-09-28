@@ -19,7 +19,7 @@ export function SosPanel() {
     api.sos.nearest,
     sos ? { lat: sos.lat, lon: sos.lon, excludeTeamId: sos.teamId ?? undefined } : "skip"
   );
-  const { me } = useMe();
+  const { me, can } = useMe();
   const [text, setText] = useState(null);
   const [ackBusy, setAckBusy] = useState(false);
   const [ackErr, setAckErr] = useState(null);
@@ -89,7 +89,7 @@ export function SosPanel() {
             <span className="inline-flex items-center gap-1.5 text-sm text-emerald-300">
               <CheckCheck size={16} /> {t("Acknowledged {time}", { time: fmtTime(sos.ackAt, "GOA") })}
             </span>
-          ) : (
+          ) : can("sos.acknowledge") && (
             <Button onClick={ack} disabled={ackBusy || !me}>
               <CheckCheck size={16} /> {ackBusy ? t("Sending…") : t("Acknowledge and reply")}
             </Button>

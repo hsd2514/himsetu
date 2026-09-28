@@ -1,4 +1,5 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery } from "./_generated/server";
+import { requirePermission } from "./authz";
 import { v } from "convex/values";
 
 export const list = query({
@@ -23,4 +24,12 @@ export const registerKey = mutation({
 export const teams = query({
   args: {},
   handler: async (ctx) => ctx.db.query("teams").collect(),
+});
+
+/** Permission check for actions, which cannot read the database directly. */
+export const assertCan = internalQuery({
+  args: { actorId: v.id("people"), perm: v.string() },
+  handler: async (ctx, { actorId, perm }) => {
+    await requirePermission(ctx, actorId, perm);
+  },
 });

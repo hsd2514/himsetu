@@ -19,7 +19,7 @@ Every resupply season moves people, fuel, food and science kit from NCPOR Goa to
 | **Field** `/field` | Phone page for field teams: SOS, Safe / Delayed / Need help, GPS, offline outbox |
 | **Sea ice** `/ice` | Sea-ice overlay, ranked candidate berths, fly-safe helicopter slots for the next 72 h |
 
-Also: English / हिन्दी toggle, five colour themes with light and dark modes, installable PWA for the field page.
+Also: English / हिन्दी toggle, light and dark mode, role-based access, installable PWA for the field page.
 
 ## How it works
 
@@ -36,6 +36,8 @@ Browser (Next.js 15, JS)                     Convex (DB, realtime, scheduler, cr
 - **Pass-gated link.** A message that touches a remote node (ship, Maitri, Bharati, field) waits for that node's next Iridium pass. At AOS the scheduler releases up to 4 messages, most urgent first, 340 bytes each. 5% are randomly dropped and retried on the next pass. Goa to Goa is instant.
 - **Demo speed.** At 60× one real second is one mission minute, so a pass 48 minutes away arrives in 48 seconds. Toggle it on the Mission page.
 - **Encryption.** Each device makes a libsodium keypair; the public key goes to Convex, the private key stays in the browser. Every message gets a fresh key, sealed to each recipient. The server only stores ciphertext.
+- **Roles (RBAC).** Planner (Goa), station lead (ship, Maitri, Bharati) and field team. Permissions live in `lib/rbac.js`; every protected Convex mutation checks them through `convex/authz.js`, and the UI hides what a role cannot do. Identity is the "Logged in as" node: a prototype stand-in for real sign-in.
+- **Stakeholder messaging.** SOS and field check-ins go to every stakeholder (Goa planner, ship and station leads). Messages are never deleted; each sender sees delivery and "read by n of m".
 - **SAR.** Nearest teams by great-circle distance, ETA at 8 km/h on foot and 20 km/h by snow vehicle.
 
 ## Run it locally
@@ -48,7 +50,7 @@ npx convex dev          # first run creates a local Convex deployment and .env.l
 npm run dev             # http://localhost:3000
 ```
 
-Open the Mission page and press **Load demo data**, or run `npx convex run seed:reset`.
+Open the Mission page and press **Load demo data**, or run `npx convex run seed:resetAll`.
 
 **On a phone** (camera scanning needs HTTPS):
 

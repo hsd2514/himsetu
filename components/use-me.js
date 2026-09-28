@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useStation } from "@/components/station-context";
 import { getOrCreateKeypair } from "@/lib/crypto";
+import { can } from "@/lib/rbac";
 
 /** The person behind the current "log in as" node, with a device keypair registered. */
 export function useMe() {
@@ -24,7 +25,7 @@ export function useMe() {
     };
   }, [me, registerKey]);
 
-  return { me, node, keyReady };
+  return { me, node, keyReady, can: (perm) => can(me?.role, perm) };
 }
 
 /** Re-render every `ms` so countdowns tick. */

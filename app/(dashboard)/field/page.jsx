@@ -65,7 +65,7 @@ export default function FieldPage() {
   const deliver = useCallback(
     async (item) => {
       await checkIn({ personId: me._id, lat: item.lat, lon: item.lon });
-      return send({ toType: "station", toId: "GOA", priority: item.priority, text: item.text, lat: item.lat, lon: item.lon });
+      return send({ toType: "stakeholders", toId: "all", priority: item.priority, text: item.text, lat: item.lat, lon: item.lon });
     },
     [me, checkIn, send]
   );
