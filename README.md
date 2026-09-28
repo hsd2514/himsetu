@@ -4,6 +4,8 @@
 
 Every resupply season moves people, fuel, food and science kit from NCPOR Goa to Cape Town, onto an ice-class ship, and on to Maitri and Bharati. Satellite links are slow and come and go. HIMSETU gives every site its own copy of the data and syncs only when a satellite is overhead, most urgent first.
 
+**Live:** https://himsetu.vercel.app (Field page for phones: https://himsetu.vercel.app/field)
+
 > Prototype for a hackathon demo. Some data is simulated and is labelled as simulated in the UI (see [What is real and what is simulated](#what-is-real-and-what-is-simulated)).
 
 ## What it does
@@ -67,7 +69,8 @@ npm run forecast:import   # loads it into the forecasts table
 ## Deploy
 
 - Backend: `npx convex deploy` (needs `npx convex login` once).
-- Frontend: import the repo on Vercel and set `NEXT_PUBLIC_CONVEX_URL` to the production Convex URL.
+- Frontend: `npx vercel@latest deploy --prod` (project `himsetu`, env `NEXT_PUBLIC_CONVEX_URL` already set on Vercel).
+- After a schema or function change, run `npx convex deploy` before the frontend deploy.
 
 No Docker and no separate server.
 
